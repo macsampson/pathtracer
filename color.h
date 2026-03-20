@@ -1,6 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "interval.h"
 #include "vec3.h"
 
 #include <algorithm>
@@ -12,9 +13,10 @@ inline void write_color(std::ostream &out, const color &pixel_color) {
 	auto g = pixel_color.y();
 	auto b = pixel_color.z();
 
-	int rbyte = int(255.999 * std::clamp(r, 0.0, 1.0));
-	int gbyte = int(255.999 * std::clamp(g, 0.0, 1.0));
-	int bbyte = int(255.999 * std::clamp(b, 0.0, 1.0));
+	static const interval intesity(0.000, 0.999);
+	int rbyte = int(256 * intesity.clamp(r));
+	int gbyte = int(256 * intesity.clamp(g));
+	int bbyte = int(256 * intesity.clamp(b));
 
 	out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
 }
