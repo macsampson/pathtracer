@@ -13,12 +13,12 @@ class sphere : public hittable {
 
   public:
 	// Constructs a sphere with the given center and radius (clamped to non-negative).
-	sphere(const point3& center, double radius) : center(center), radius(std::fmax(0, radius)) {
-		// TODO: Initializses th material pointer mat
-	}
+	sphere(const point3& center, double radius, shared_ptr<material> mat)
+		: center(center), radius(std::fmax(0, radius)), mat(mat) {}
 
-	// Tests whether the ray r hits this sphere within interval ray_t using the quadratic formula.
-	// Populates rec with the hit details for the nearest valid intersection and returns true.
+	// Tests whether the ray r hits this sphere within interval ray_t using the quadratic
+	// formula. Populates rec with the hit details for the nearest valid intersection and
+	// returns true.
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 		vec3 oc = center - r.origin();
 		auto a = r.direction().length_squared();

@@ -10,7 +10,8 @@ class material {
 	virtual ~material() = default;
 
 	// Scatters the incoming ray at a hit point; sets attenuation and the scattered ray.
-	// Returns true if the ray is scattered, false if it is absorbed. Base class absorbs all rays.
+	// Returns true if the ray is scattered, false if it is absorbed. Base class absorbs all
+	// rays.
 	virtual bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
 						 ray& scattered) const {
 		return false;
@@ -43,18 +44,20 @@ class lambertian : public material {
 class metal : public material {
   private:
 	color albedo;
+	double fuzz;
 
   public:
 	// Constructs a metallic material with the given albedo color.
-	metal(const color& albedo) : albedo(albedo) {}
+	metal(const color& albedo, double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
 
 	// Scatters the ray via specular reflection about the surface normal.
 	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
 				 ray& scattered) const override {
 		vec3 reflected = reflect(r_in.direction(), rec.normal);
+		reflected = unit_vector(reflected) + (fuzz * random_unit_vector());
 		scattered = ray(rec.point, reflected);
 		attenuation = albedo;
-		return true;
+		return (dot(scattered.direction(), rec.normal) > 0);
 	}
 };
 
