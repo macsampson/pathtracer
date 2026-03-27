@@ -1,6 +1,7 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
+#include "aabb.h"
 #include "rtweekend.h"
 #include <memory>
 
@@ -31,6 +32,8 @@ class hittable {
 	// Tests whether the ray r hits this object within the interval ray_t.
 	// If a hit is found, populates rec with hit details and returns true.
 	virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+
+	virtual aabb bounding_box() const = 0;
 };
 
 #endif

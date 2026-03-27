@@ -69,8 +69,9 @@ class camera {
 
 		auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
 		auto ray_direction = pixel_sample - ray_origin;
+		auto ray_time = random_double();
 
-		return ray(ray_origin, ray_direction);
+		return ray(ray_origin, ray_direction, ray_time);
 	}
 
 	// Returns a random offset vector in the unit square [-0.5, 0.5]^2 for anti-aliasing jitter.
