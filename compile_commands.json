@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/macsa/dev/raytracing",
+  "command": "/usr/bin/c++    -o CMakeFiles/raytracing.dir/main.cpp.o -c /home/macsa/dev/raytracing/main.cpp",
+  "file": "/home/macsa/dev/raytracing/main.cpp",
+  "output": "CMakeFiles/raytracing.dir/main.cpp.o"
+}
+]

@@ -16,6 +16,8 @@ class hit_record {
 	double t;
 	bool front_face;
 	shared_ptr<material> mat;
+	double u;
+	double v;
 
 	// Sets the hit record normal vector so it always points against the incoming ray.
 	// Determines front_face based on the ray direction vs. the outward normal.

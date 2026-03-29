@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/macsa/dev/raytracing/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

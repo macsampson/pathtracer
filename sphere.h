@@ -4,7 +4,10 @@
 #include "aabb.h"
 #include "hittable.h"
 #include "interval.h"
+#include "rtweekend.h"
 #include "vec3.h"
+#include <cmath>
+#include <csetjmp>
 #include <memory>
 
 class sphere : public hittable {
@@ -14,8 +17,16 @@ class sphere : public hittable {
 	std::shared_ptr<material> mat;
 	aabb bbox;
 
+	static void get_sphere_uv(const point3& p, double& u, double& v) {
+		auto theta = std::acos(-p.y());
+		auto phi = std::atan2(-p.z(), p.x()) + pi;
+
+		u = phi / (2 * pi);
+		v = theta / pi;
+	}
+
   public:
-	// Constructs a stationary sphere with the given center and radius (clamped to
+	// Constructs a STATIONARY sphere with the given center and radius (clamped to
 	// non-negative).
 	sphere(const point3& static_center, double radius, shared_ptr<material> mat)
 		: center(static_center, vec3(0, 0, 0)), radius(std::fmax(0, radius)), mat(mat) {
@@ -23,7 +34,7 @@ class sphere : public hittable {
 		bbox = aabb(static_center - rvec, static_center + rvec);
 	}
 
-	// Constructs a moving sphere along a ray directon
+	// Constructs a MOVING sphere along a ray directon
 	sphere(const point3& center1, const point3& center2, double radius,
 		   shared_ptr<material> mat)
 		: center(center1, center2 - center1), radius(std::fmax(0, radius)), mat(mat) {
@@ -62,6 +73,7 @@ class sphere : public hittable {
 		// rec.normal = (rec.point - center) / radius;
 		vec3 outward_normal = (rec.point - current_center) / radius;
 		rec.set_face_normal(r, outward_normal);
+		get_sphere_uv(outward_normal, rec.u, rec.v);
 		rec.mat = mat;
 
 		return true;

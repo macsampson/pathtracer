@@ -3,8 +3,10 @@
 
 #include "hittable.h"
 #include "rtweekend.h"
+#include "texture.h"
 #include "vec3.h"
 #include <cmath>
+#include <memory>
 
 class material {
   public:
@@ -21,11 +23,12 @@ class material {
 
 class lambertian : public material {
   private:
-	color albedo;
+	std::shared_ptr<texture> tex;
 
   public:
 	// Constructs a Lambertian (diffuse) material with the given albedo color.
-	lambertian(const color& albedo) : albedo(albedo) {}
+	lambertian(const color& albedo) : tex(std::make_shared<solid_color>(albedo)) {}
+	lambertian(shared_ptr<texture> tex) : tex(tex) {}
 
 	// Scatters the ray diffusely using a Lambertian distribution (normal + random unit vector).
 	// Corrects near-zero scatter directions to avoid degenerate rays.
@@ -37,7 +40,7 @@ class lambertian : public material {
 			scatter_direction = rec.normal;
 
 		scattered = ray(rec.point, scatter_direction, r_in.time());
-		attenuation = albedo;
+		attenuation = tex->value(rec.u, rec.v, rec.point);
 		return true;
 	}
 };

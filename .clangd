@@ -4,3 +4,5 @@
 #     - "undeclared_var_use"
 #     - "unknown_typename"
 #     - "typename_nested_not_found"
+Completion:
+  AllScopes: true
