@@ -5,3 +5,6 @@ UseTab: Always
 ColumnLimit: 96
 PointerAlignment: Left
 AllowShortFunctionsOnASingleLine: Empty
+BreakBeforeBinaryOperators: All
+AlignOperands: Align
+AlwaysBreakBeforeMultilineStrings: true

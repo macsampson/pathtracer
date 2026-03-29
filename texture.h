@@ -16,8 +16,6 @@ class texture {
 };
 
 class solid_color : public texture {
-  private:
-	color albedo;
 
   public:
 	solid_color(const color& albedo) : albedo(albedo) {};
@@ -27,14 +25,12 @@ class solid_color : public texture {
 	color value(double u, double v, const point3& p) const override {
 		return albedo;
 	}
+
+  private:
+	color albedo;
 };
 
 class checker_texture : public texture {
-  private:
-	double inv_scale;
-	std::shared_ptr<texture> even;
-	std::shared_ptr<texture> odd;
-
   public:
 	checker_texture(double scale, std::shared_ptr<texture> even, shared_ptr<texture> odd)
 		: inv_scale(1.0 / scale), even(even), odd(odd) {}
@@ -51,12 +47,14 @@ class checker_texture : public texture {
 
 		return isEven ? even->value(u, v, p) : odd->value(u, v, p);
 	}
+
+  private:
+	double inv_scale;
+	std::shared_ptr<texture> even;
+	std::shared_ptr<texture> odd;
 };
 
 class image_texture : public texture {
-  private:
-	rtw_image image;
-
   public:
 	image_texture(const char* filename) : image(filename) {}
 
@@ -74,18 +72,23 @@ class image_texture : public texture {
 		auto color_scale = 1.0 / 255.0;
 		return color(color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2]);
 	}
+
+  private:
+	rtw_image image;
 };
 
 class noise_texture : public texture {
-  private:
-	perlin noise;
 
   public:
-	noise_texture() {}
+	noise_texture(double scale) : scale(scale) {}
 
 	color value(double u, double v, const point3& p) const override {
-		return color(1, 1, 1) * noise.noise(p);
+		return color(0.5, 0.5, 0.5) * (1 + std::sin(scale * p.z() + 10 * noise.turb(p, 7)));
 	}
+
+  private:
+	perlin noise;
+	double scale;
 };
 
 #endif
