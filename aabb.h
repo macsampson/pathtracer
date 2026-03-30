@@ -3,7 +3,7 @@
 
 #include "interval.h"
 #include "vec3.h"
-#include <regex>
+
 class aabb {
   public:
 	interval x, y, z;
@@ -11,7 +11,9 @@ class aabb {
 	aabb() {}; // AABB is empty by default
 
 	// Construct from three explicit axis-aligned intervals.
-	aabb(const interval& x, const interval& y, const interval& z) : x(x), y(y), z(z) {}
+	aabb(const interval& x, const interval& y, const interval& z) : x(x), y(y), z(z) {
+		pad_to_minimums();
+	}
 
 	// Construct the AABB tightly enclosing two corner points.
 	// Points can be in any order; each axis is sorted independently.
@@ -85,9 +87,29 @@ class aabb {
 	}
 
 	static const aabb empty, universe;
+
+  private:
+	void pad_to_minimums() {
+		double delta = 0.0001;
+
+		if (x.size() < delta)
+			x = x.expand(delta);
+		if (y.size() < delta)
+			y = y.expand(delta);
+		if (z.size() < delta)
+			z = z.expand(delta);
+	}
 };
 
 const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
 const aabb aabb::universe = aabb(interval::universe, interval::universe, interval::universe);
+
+aabb operator+(const aabb& bbox, const vec3& offset) {
+	return aabb(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
+}
+
+aabb operator+(const vec3& offset, const aabb& bbox) {
+	return bbox + offset;
+}
 
 #endif
