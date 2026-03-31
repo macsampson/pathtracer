@@ -2,18 +2,13 @@
 #define CAMERA_H
 
 #include "core/color.h"
-#include "geometry/hittable.h"
-#include "materials/material.h"
 #include "core/rtweekend.h"
 #include "core/vec3.h"
-#include <algorithm>
+#include "geometry/hittable.h"
 #include <atomic>
 #include <cmath>
-#include <execution>
-#include <iostream>
-#include <numeric>
-#include <ostream>
-#include <thread>
+#include <tbb/blocked_range2d.h>
+#include <tbb/parallel_for.h>
 #include <vector>
 
 class camera {
@@ -39,28 +34,44 @@ class camera {
 		// Multithreading the rendering of each row
 		std::vector<color> framebuffer(image_width * image_height);
 
-		std::vector<int> scanlines(image_height);
-		std::iota(scanlines.begin(), scanlines.end(), 0);
+		// std::vector<int> scanlines(image_height);
+		// std::iota(scanlines.begin(), scanlines.end(), 0);
 
-		std::atomic<int> lines_done{0};
+		std::atomic<int> pixels_done{0};
+		const int total_pixels = image_height * image_width;
 
 		std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-		// std::clog << "Hardware concurrency: " << std::thread::hardware_concurrency() << std::endl;
-
-		std::for_each(std::execution::par, scanlines.begin(), scanlines.end(), [&](int j) {
-			for (int i = 0; i < image_width; i++) {
-				color pixel_color(0, 0, 0);
-				for (int sample = 0; sample < samples_per_pixel; sample++) {
-					ray r = get_ray(i, j);
-					pixel_color += ray_color(r, max_depth, world);
-				}
-				framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
-			}
-			int done = ++lines_done;
-			if (done % 10 == 0)
-				std::clog << "\rScanlines done: " << done << "/" << image_height << std::flush;
-		});
+		tbb::parallel_for(
+			tbb::blocked_range2d<int>(0, image_height, 32, 0, image_width, 32),
+			[&](const tbb::blocked_range2d<int>& r) {
+				for (int j = r.rows().begin(); j < r.rows().end(); j++)
+					for (int i = r.cols().begin(); i < r.cols().end(); i++) {
+						color pixel_color(0, 0, 0);
+						for (int sample = 0; sample < samples_per_pixel; sample++) {
+							ray pixel_ray = get_ray(i, j);
+							pixel_color += ray_color(pixel_ray, max_depth, world);
+						}
+						framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
+					}
+				int tile_pixels
+					= (r.rows().end() - r.rows().begin()) * (r.cols().end() - r.cols().begin());
+				int done = (pixels_done += tile_pixels);
+				std::clog << "\rRendering: " << (100 * done / total_pixels) << "%" << std::flush;
+			});
+		// std::for_each(std::execution::par, scanlines.begin(), scanlines.end(), [&](int j) {
+		// 	for (int i = 0; i < image_width; i++) {
+		// 		color pixel_color(0, 0, 0);
+		// 		for (int sample = 0; sample < samples_per_pixel; sample++) {
+		// 			ray r = get_ray(i, j);
+		// 			pixel_color += ray_color(r, max_depth, world);
+		// 		}
+		// 		framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
+		// 	}
+		// 	int done = ++lines_done;
+		// 	if (done % 10 == 0)
+		// 		std::clog << "\rScanlines done: " << done << "/" << image_height << std::flush;
+		// });
 
 		for (int j = 0; j < image_height; j++) {
 			for (int i = 0; i < image_width; i++) {

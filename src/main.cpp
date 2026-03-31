@@ -27,7 +27,7 @@ void cornell_box_volumes(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
 
 int main() {
-	switch (1) {
+	switch (7) {
 	case 1:
 		space(1600, 10000, 20);
 		break;

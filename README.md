@@ -1,4 +1,4 @@
-# Software Ray Tracer
+# Software Path Tracer
 
 A C++ Monte Carlo path tracer that simulates physically-based light transport to produce photorealistic renders.
 
@@ -12,7 +12,7 @@ A C++ Monte Carlo path tracer that simulates physically-based light transport to
 
 - **Physically-Based Materials** — Lambertian diffuse, specular metal with Schlick–Fresnel approximation, dielectric refraction (Snell's Law) with total internal reflection
 - **BVH Acceleration** — Bounding Volume Hierarchy with AABB slab-method ray tests; reduces scene traversal from O(n) to O(log n)
-- **Multithreading** — Tile-based parallel rendering via Intel TBB; ~15× speedup over sequential on a multi-core CPU
+- **Multithreading** — Parallel rendering via Intel TBB; ~3.75× speedup over sequential on a multi-core CPU
 - **Optical Effects** — Depth-of-field (defocus disk sampling), motion blur (time-parameterized intersection), area lighting
 - **Procedural Textures** — Perlin noise with trilinear interpolation, Hermite smoothing, and multi-octave turbulence
 - **Image Textures** — UV-mapped JPG/PNG via stb_image (earth, moon, mars surfaces)
@@ -36,15 +36,14 @@ A C++ Monte Carlo path tracer that simulates physically-based light transport to
 
 ## Performance
 
-Benchmarks on the Cornell Box scene (600×600). Multithreading uses Intel TBB for tile-based parallelism.
+Benchmarks on the Cornell Box scene (400×400, 1000 SPP). Multithreading uses Intel TBB for tile-based parallelism.
 
-| Configuration | SPP | Render Time |
-|---|---|---|
-| Single-threaded | 100 | 22m 00s |
-| Multi-threaded (TBB) | 100 | 1m 25s |
-| Multi-threaded (TBB) | 200 | 2m 45s |
+| Configuration | Render Time |
+|---|---|
+| Single-threaded | 4m 46s |
+| Multi-threaded (TBB) | 1m 16s |
 
-**~15.5× speedup** from multithreading at 100 SPP.
+**~3.75× speedup** from multithreading.
 
 ---
 
