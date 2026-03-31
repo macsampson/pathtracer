@@ -60,8 +60,10 @@ Benchmarks on the Cornell Box scene (400×400, 1000 SPP). Multithreading uses In
 ```bash
 cmake -B build
 cmake --build build
-./build/raytracing > image.ppm
+./build/raytracing
 ```
+
+All renders are placed in the renders folder with timestamps and samples per pixel appended to filenames.
 
 ---
 
