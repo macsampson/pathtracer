@@ -1,22 +1,22 @@
 #include "core/color.h"
-#include "geometry/constant_medium.h"
-#include "materials/material.h"
-#include "geometry/quad.h"
 #include "core/rtweekend.h"
+#include "geometry/constant_medium.h"
+#include "geometry/quad.h"
+#include "materials/material.h"
 
+#include "core/vec3.h"
 #include "geometry/bvh.h"
-#include "rendering/camera.h"
 #include "geometry/hittable.h"
 #include "geometry/hittable_list.h"
 #include "geometry/sphere.h"
 #include "materials/texture.h"
-#include "core/vec3.h"
+#include "rendering/camera.h"
 #include <iostream>
 #include <memory>
 
 using std::make_shared;
 
-void scene1(int image_width, int samples_per_pixel, int max_depth);
+void space(int image_width, int samples_per_pixel, int max_depth);
 void scene2(int image_width, int samples_per_pixel, int max_depth);
 void moon(int image_width, int samples_per_pixel, int max_depth);
 void perlin_spheres(int image_width, int samples_per_pixel, int max_depth);
@@ -24,12 +24,12 @@ void quads(int image_width, int samples_per_pixel, int max_depth);
 void light_testing(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box_volumes(int image_width, int samples_per_pixel, int max_depth);
-void final_scene(int image_width, int samples_per_pixel, int max_depth);
+void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
 
 int main() {
-	switch (6) {
+	switch (1) {
 	case 1:
-		scene1(1200, 10, 20);
+		space(1600, 10000, 20);
 		break;
 	case 2:
 		scene2(400, 100, 50);
@@ -47,13 +47,13 @@ int main() {
 		light_testing(800, 1000, 50);
 		break;
 	case 7:
-		cornell_box(400, 100, 50);
+		cornell_box(400, 1000, 50);
 		break;
 	case 8:
 		cornell_box_volumes(800, 200, 50);
 		break;
 	case 9:
-		final_scene(800, 1000, 40);
+		cornell_box_2(800, 10000, 40);
 		break;
 	}
 }
@@ -187,6 +187,56 @@ void moon(int image_width, int samples_per_pixel, int max_depth) {
 	cam.render(hittable_list(globe));
 }
 
+void space(int image_width, int samples_per_pixel, int max_depth) {
+	hittable_list space;
+
+	auto moon_texure = make_shared<image_texture>("assets/moon_texture.jpg");
+	auto earth_texure = make_shared<image_texture>("assets/earth_texture1.jpg");
+	auto mars_texure = make_shared<image_texture>("assets/mars_texture.jpg");
+
+	auto moon_surface = make_shared<lambertian>(moon_texure);
+	auto earth_surface = make_shared<lambertian>(earth_texure);
+	auto mars_surface = make_shared<lambertian>(mars_texure);
+
+	shared_ptr<hittable> moon = make_shared<sphere>(point3(0, 0, 0), 0.5, moon_surface);
+	moon = make_shared<rotate_y>(moon, 0);
+	moon = make_shared<translate>(moon, vec3(1, 1, 2));
+	space.add(moon);
+
+	shared_ptr<hittable> earth = make_shared<sphere>(point3(0, 0, 0), 2, earth_surface);
+	// shared_ptr<hittable> atmosphere
+	// 	= make_shared<sphere>(point3(2, 0, 0), 2.1, make_shared<lambertian>(color(0.7, 0.95, 1.0)));
+	earth = make_shared<rotate_y>(earth, 180);
+	earth = make_shared<translate>(earth, vec3(2, 0, 0));
+	// earth = make_shared<constant_medium>(atmosphere, 0.1, color(0.7, 0.95, 1.0));
+	space.add(earth);
+
+	shared_ptr<hittable> mars = make_shared<sphere>(point3(0, 0, 0), 0.2, mars_surface);
+	mars = make_shared<rotate_y>(mars, 180);
+	mars = make_shared<translate>(mars, vec3(-9, 0, -9));
+	space.add(mars);
+
+	auto lighting = make_shared<diffuse_light>(color(40, 40, 20));
+	space.add(make_shared<sphere>(point3(20, 15, 0), 5, lighting));
+
+	camera cam;
+
+	cam.aspect_ratio = 16.0 / 9.0;
+	cam.image_width = image_width;
+	cam.samples_per_pixel = samples_per_pixel;
+	cam.max_depth = max_depth;
+	cam.background = color(0, 0, 0);
+
+	cam.vfov = 10;
+	cam.lookfrom = point3(15, 0, 30);
+	cam.lookat = point3(0, 0, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	cam.render(space);
+}
+
 void perlin_spheres(int image_width, int samples_per_pixel, int max_depth) {
 	hittable_list world;
 
@@ -283,10 +333,10 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
 	auto white = make_shared<lambertian>(color(.73, .73, .73));
 	auto green = make_shared<lambertian>(color(.12, .45, .15));
-	auto light = make_shared<diffuse_light>(color(15, 15, 15));
+	auto light = make_shared<diffuse_light>(color(30, 30, 30));
 
-	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
-	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
 	world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
@@ -301,6 +351,76 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
 	box2 = make_shared<rotate_y>(box2, 15);
 	box2 = make_shared<translate>(box2, vec3(295, 0, 295));
 	world.add(box2);
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = image_width;
+	cam.samples_per_pixel = samples_per_pixel;
+	cam.max_depth = max_depth;
+	cam.background = color(0, 0, 0);
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+
+	cam.defocus_angle = 0;
+
+	cam.render(world);
+}
+
+void cornell_box_2(int image_width, int samples_per_pixel, int max_depth) {
+	hittable_list world;
+
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(30, 30, 30));
+	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0.5);
+	auto green_metal = make_shared<metal>(color(.12, .45, .15), 0.5);
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
+	world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<hittable> glass_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<dielectric>(1.5));
+	// box1 = make_shared<rotate_y>(box1, -18);
+	glass_sphere = make_shared<translate>(glass_sphere, vec3(150, 75, 200));
+	world.add(glass_sphere);
+
+	shared_ptr<hittable> mirror_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 150, make_shared<metal>(color(0.5, 0.5, 0.5), 0));
+	// box1 = make_shared<rotate_y>(box1, -18);
+	mirror_sphere = make_shared<translate>(mirror_sphere, vec3(0, 555, 555));
+	world.add(mirror_sphere);
+
+	// shared_ptr<hittable> cloud_sphere = make_shared<sphere>(point3(0, 0, 0), 100, white);
+	// // box1 = make_shared<rotate_y>(box1, -18);
+	// cloud_sphere = make_shared<translate>(cloud_sphere, vec3(450, 450, 400));
+	// world.add(make_shared<constant_medium>(cloud_sphere, 0.01, color(.12, 0, .15)));
+
+	shared_ptr<hittable> tall_yellow_box
+		= box(point3(0, 0, 0), point3(70, 300, 70), make_shared<metal>(color(0.5, 0.5, 0.0), 0.5));
+	tall_yellow_box = make_shared<rotate_y>(tall_yellow_box, -45);
+	tall_yellow_box = make_shared<translate>(tall_yellow_box, vec3(50, 0, 450));
+	world.add(make_shared<constant_medium>(tall_yellow_box, 0.05, color(1.0, 0.75, 0.2)));
+
+	shared_ptr<hittable> large_mirror_box
+		= box(point3(0, 0, 0), point3(200, 200, 200), make_shared<metal>(color(1.0, 1.0, 1.0), 0.1));
+	large_mirror_box = make_shared<rotate_y>(large_mirror_box, 45);
+	large_mirror_box = make_shared<translate>(large_mirror_box, vec3(250, 0, 300));
+	world.add(large_mirror_box);
+
+	shared_ptr<hittable> small_lambertian_box
+		= box(point3(0, 0, 0), point3(100, 200, 100), make_shared<diffuse_light>(color(0.7, 0.95, 1.0)));
+	small_lambertian_box = make_shared<rotate_y>(small_lambertian_box, -20);
+	small_lambertian_box = make_shared<translate>(small_lambertian_box, vec3(350, 200, 250));
+	world.add(make_shared<constant_medium>(small_lambertian_box, 0.3, color(0.7, 0.95, 1.0)));
 
 	camera cam;
 

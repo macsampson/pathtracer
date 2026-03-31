@@ -10,7 +10,9 @@ compile_commands.json
 Makefile
 
 # Output
+*/*.ppm
 *.ppm
+*.png
 
 # Binary
 raytracing
