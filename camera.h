@@ -46,7 +46,7 @@ class camera {
 
 		std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-		std::clog << "Hardware concurrency: " << std::thread::hardware_concurrency() << std::endl;
+		// std::clog << "Hardware concurrency: " << std::thread::hardware_concurrency() << std::endl;
 
 		std::for_each(std::execution::par, scanlines.begin(), scanlines.end(), [&](int j) {
 			for (int i = 0; i < image_width; i++) {
