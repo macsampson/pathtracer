@@ -22,7 +22,7 @@ using std::make_shared;
 
 void space(int image_width, int samples_per_pixel, int max_depth);
 void scene2(int image_width, int samples_per_pixel, int max_depth);
-void moon(int image_width, int samples_per_pixel, int max_depth);
+void cube_room(int image_width, int samples_per_pixel, int max_depth);
 void perlin_spheres(int image_width, int samples_per_pixel, int max_depth);
 void quads(int image_width, int samples_per_pixel, int max_depth);
 void light_testing(int image_width, int samples_per_pixel, int max_depth);
@@ -32,7 +32,7 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
 
 int main(int argc, char* argv[]) {
 	std::string output_file = (argc > 1) ? argv[1] : "output.png";
-	switch (8) {
+	switch (3) {
 	case 1:
 		space(1600, 10000, 20);
 		break;
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 		scene2(400, 100, 50);
 		break;
 	case 3:
-		moon(1200, 100, 50);
+		cube_room(500, 200, 50);
 		break;
 	case 4:
 		perlin_spheres(800, 1000, 50);
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 		cornell_box(400, 500, 50);
 		break;
 	case 8:
-		cornell_box_mirrors(600, 1000, 50);
+		cornell_box_mirrors(500, 500, 50);
 		break;
 	case 9:
 		cornell_box_2(800, 10000, 40);
@@ -468,8 +468,8 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 	for (int a = 0; a < 5; a++) {
 		for (int b = 0; b < 5; b++) {
 			auto choose_mat = random_double();
-			point3 center(80 + a * 100 + random_double(-20, 20), random_double(radius, 555 - radius),
-						  80 + b * 100 + random_double(-20, 20));
+			point3 center(radius + (a * 100) + random_double(0, 30), random_double(radius, 555 - radius),
+						  radius + (b * 100) + random_double(0, 30));
 
 			bool overlaps = false;
 
@@ -489,20 +489,21 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 			double volume_density = 0;
 			bool volume = false;
 
-			if (choose_mat < 0.0) {
-				// choose diffuse
-				auto albedo = color::random() * color::random();
-				sphere_material = make_shared<lambertian>(albedo);
-			} else if (choose_mat < 0.3) {
+			// if (choose_mat < 0.0) {
+			// 	// choose diffuse
+			// 	auto albedo = color::random() * color::random();
+			// 	sphere_material = make_shared<lambertian>(albedo);
+			// } else
+			if (choose_mat < 0.4) {
 				// choose metal
-				auto albedo = color::random(0.5, 1);
+				auto albedo = color::random(0.05, 1);
 				auto fuzz = random_double(0, 0.1);
 				sphere_material = make_shared<metal>(albedo, fuzz);
-			} else if (choose_mat < 0.5) {
+			} else if (choose_mat < 0.52) {
 				// emissive
-				auto albedo = color::random(0.5, 5.0);
+				auto albedo = color::random(0.1, 1.5);
 				sphere_material = make_shared<diffuse_light>(albedo);
-			} else if (choose_mat < 0.75) {
+			} else if (choose_mat < 0.8) {
 				// volume
 				volume_albedo = color::random(0, 1);
 				volume_density = random_double(0.01, 0.1);
@@ -562,16 +563,16 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 	cam.render(world);
 }
 
-void final_scene(int image_width, int samples_per_pixel, int max_depth) {
+void cube_room(int image_width, int samples_per_pixel, int max_depth) {
 	hittable_list boxes1;
-	auto ground = make_shared<lambertian>(color(0.48, 0.83, 0.53));
 
 	int boxes_per_side = 20;
 	for (int i = 0; i < boxes_per_side; i++) {
 		for (int j = 0; j < boxes_per_side; j++) {
+			auto ground = make_shared<lambertian>(color::random());
 			auto w = 100.0;
-			auto x0 = -1000.0 + i * w;
-			auto z0 = -1000.0 + j * w;
+			auto x0 = -500.0 + i * w;
+			auto z0 = -500.0 + j * w;
 			auto y0 = 0.0;
 			auto x1 = x0 + w;
 			auto y1 = random_double(1, 101);
@@ -588,35 +589,35 @@ void final_scene(int image_width, int samples_per_pixel, int max_depth) {
 	auto light = make_shared<diffuse_light>(color(7, 7, 7));
 	world.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), light));
 
-	auto center1 = point3(400, 400, 200);
-	auto center2 = center1 + vec3(30, 0, 0);
-	auto sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
-	world.add(make_shared<sphere>(center1, center2, 50, sphere_material));
+	// auto center1 = point3(400, 400, 200);
+	// auto center2 = center1 + vec3(30, 0, 0);
+	// auto sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
+	// world.add(make_shared<sphere>(center1, center2, 50, sphere_material));
 
-	world.add(make_shared<sphere>(point3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
-	world.add(
-		make_shared<sphere>(point3(0, 150, 145), 50, make_shared<metal>(color(0.8, 0.8, 0.9), 1.0)));
+	// world.add(make_shared<sphere>(point3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
+	// world.add(
+	// 	make_shared<sphere>(point3(0, 150, 145), 50, make_shared<metal>(color(0.8, 0.8, 0.9), 1.0)));
 
-	auto boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
-	world.add(boundary);
-	world.add(make_shared<constant_medium>(boundary, 0.2, color(0.2, 0.4, 0.9)));
-	boundary = make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
-	world.add(make_shared<constant_medium>(boundary, .0001, color(1, 1, 1)));
+	// auto boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
+	// world.add(boundary);
+	// world.add(make_shared<constant_medium>(boundary, 0.2, color(0.2, 0.4, 0.9)));
+	// boundary = make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
+	// world.add(make_shared<constant_medium>(boundary, .0001, color(1, 1, 1)));
 
-	auto emat = make_shared<lambertian>(make_shared<image_texture>("assets/moontexture.jpg"));
-	world.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
-	auto pertext = make_shared<noise_texture>(0.2);
-	world.add(make_shared<sphere>(point3(220, 280, 300), 80, make_shared<lambertian>(pertext)));
+	// auto emat = make_shared<lambertian>(make_shared<image_texture>("assets/moontexture.jpg"));
+	// world.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
+	// auto pertext = make_shared<noise_texture>(0.2);
+	// world.add(make_shared<sphere>(point3(220, 280, 300), 80, make_shared<lambertian>(pertext)));
 
-	hittable_list boxes2;
-	auto white = make_shared<lambertian>(color(.73, .73, .73));
-	int ns = 1000;
-	for (int j = 0; j < ns; j++) {
-		boxes2.add(make_shared<sphere>(point3::random(0, 165), 10, white));
-	}
+	// hittable_list boxes2;
+	// auto white = make_shared<lambertian>(color(.73, .73, .73));
+	// int ns = 1000;
+	// for (int j = 0; j < ns; j++) {
+	// 	boxes2.add(make_shared<sphere>(point3::random(0, 165), 10, white));
+	// }
 
-	world.add(make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2), 15),
-									 vec3(-100, 270, 395)));
+	// world.add(make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2), 15),
+	// 								 vec3(-100, 270, 395)));
 
 	camera cam;
 

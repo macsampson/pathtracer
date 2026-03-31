@@ -55,7 +55,7 @@ class camera {
 		std::atomic<int> pixels_done{0};
 		const int total_pixels = image_height * image_width;
 
-		std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+		// std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
 		tbb::parallel_for(
 			tbb::blocked_range2d<int>(0, image_height, 32, 0, image_width, 32),
