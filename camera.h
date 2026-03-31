@@ -6,8 +6,15 @@
 #include "material.h"
 #include "rtweekend.h"
 #include "vec3.h"
+#include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <execution>
 #include <iostream>
+#include <numeric>
+#include <ostream>
+#include <thread>
+#include <vector>
 
 class camera {
 
@@ -29,22 +36,38 @@ class camera {
 	// Renders the scene to stdout as a PPM image by shooting samples_per_pixel rays per pixel.
 	void render(const hittable& world) {
 		initialize();
+		// Multithreading the rendering of each row
+		std::vector<color> framebuffer(image_width * image_height);
+
+		std::vector<int> scanlines(image_height);
+		std::iota(scanlines.begin(), scanlines.end(), 0);
+
+		std::atomic<int> lines_done{0};
 
 		std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-		for (int j = 0; j < image_height; j++) {
-			std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+		std::clog << "Hardware concurrency: " << std::thread::hardware_concurrency() << std::endl;
+
+		std::for_each(std::execution::par, scanlines.begin(), scanlines.end(), [&](int j) {
 			for (int i = 0; i < image_width; i++) {
 				color pixel_color(0, 0, 0);
 				for (int sample = 0; sample < samples_per_pixel; sample++) {
 					ray r = get_ray(i, j);
 					pixel_color += ray_color(r, max_depth, world);
 				}
-				write_color(std::cout, pixel_samples_scale * pixel_color);
+				framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
+			}
+			int done = ++lines_done;
+			if (done % 10 == 0)
+				std::clog << "\rScanlines done: " << done << "/" << image_height << std::flush;
+		});
+
+		for (int j = 0; j < image_height; j++) {
+			for (int i = 0; i < image_width; i++) {
+
+				write_color(std::cout, framebuffer[j * image_width + i]);
 			}
 		}
-
-		std::clog << "\rDone. \n";
 	}
 
   private:
@@ -101,8 +124,8 @@ class camera {
 	// Returns a ray from the camera through a random sample point within pixel (i, j).
 	ray get_ray(int i, int j) const {
 		auto offset = sample_square();
-		auto pixel_sample = pixel00_loc + ((i + offset.x()) * pixel_delta_u)
-							+ ((j + offset.y()) * pixel_delta_v);
+		auto pixel_sample
+			= pixel00_loc + ((i + offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);
 
 		auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
 		auto ray_direction = pixel_sample - ray_origin;
