@@ -1,1 +1,1 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/raytracing.dir/link.d CMakeFiles/raytracing.dir/main.cpp.o -o raytracing
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/raytracing.dir/link.d CMakeFiles/raytracing.dir/main.cpp.o -o raytracing  /usr/lib64/libtbb.so.12.14

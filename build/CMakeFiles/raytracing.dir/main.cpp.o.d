@@ -1,6 +1,7 @@
 CMakeFiles/raytracing.dir/main.cpp.o: /home/macsa/dev/raytracing/main.cpp \
  /usr/include/stdc-predef.h /home/macsa/dev/raytracing/color.h \
- /home/macsa/dev/raytracing/vec3.h /usr/include/c++/15/cmath \
+ /home/macsa/dev/raytracing/interval.h \
+ /home/macsa/dev/raytracing/rtweekend.h /usr/include/c++/15/cmath \
  /usr/include/c++/15/bits/requires_hosted.h \
  /usr/include/c++/15/x86_64-redhat-linux/bits/c++config.h \
  /usr/include/bits/wordsize.h \
@@ -41,7 +42,8 @@ CMakeFiles/raytracing.dir/main.cpp.o: /home/macsa/dev/raytracing/main.cpp \
  /usr/include/bits/pthreadtypes-arch.h \
  /usr/include/bits/atomic_wide_counter.h /usr/include/bits/struct_mutex.h \
  /usr/include/bits/struct_rwlock.h /usr/include/alloca.h \
- /usr/include/bits/stdlib-float.h /usr/include/c++/15/bits/specfun.h \
+ /usr/include/bits/stdlib-bsearch.h /usr/include/bits/stdlib-float.h \
+ /usr/include/c++/15/bits/specfun.h \
  /usr/include/c++/15/bits/stl_algobase.h \
  /usr/include/c++/15/bits/functexcept.h \
  /usr/include/c++/15/bits/exception_defines.h \
@@ -129,11 +131,12 @@ CMakeFiles/raytracing.dir/main.cpp.o: /home/macsa/dev/raytracing/main.cpp \
  /usr/include/bits/types/__fpos_t.h /usr/include/bits/types/__fpos64_t.h \
  /usr/include/bits/types/struct_FILE.h \
  /usr/include/bits/types/cookie_io_functions_t.h \
- /usr/include/bits/stdio_lim.h /usr/include/c++/15/cerrno \
- /usr/include/errno.h /usr/include/bits/errno.h \
- /usr/include/linux/errno.h /usr/include/asm/errno.h \
- /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- /usr/include/bits/types/error_t.h /usr/include/c++/15/bits/charconv.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/stdio.h \
+ /usr/include/c++/15/cerrno /usr/include/errno.h \
+ /usr/include/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/asm/errno.h /usr/include/asm-generic/errno.h \
+ /usr/include/asm-generic/errno-base.h /usr/include/bits/types/error_t.h \
+ /usr/include/c++/15/bits/charconv.h \
  /usr/include/c++/15/bits/basic_string.tcc \
  /usr/include/c++/15/bits/memory_resource.h /usr/include/c++/15/cstddef \
  /usr/include/c++/15/bits/uses_allocator.h \
@@ -152,4 +155,243 @@ CMakeFiles/raytracing.dir/main.cpp.o: /home/macsa/dev/raytracing/main.cpp \
  /usr/include/c++/15/bits/locale_facets.tcc \
  /usr/include/c++/15/bits/basic_ios.tcc \
  /usr/include/c++/15/bits/ostream.tcc /usr/include/c++/15/istream \
- /usr/include/c++/15/bits/istream.tcc /home/macsa/dev/raytracing/ray.h
+ /usr/include/c++/15/bits/istream.tcc /usr/include/c++/15/memory \
+ /usr/include/c++/15/bits/stl_tempbuf.h \
+ /usr/include/c++/15/bits/stl_uninitialized.h \
+ /usr/include/c++/15/bits/stl_raw_storage_iter.h \
+ /usr/include/c++/15/bits/align.h /usr/include/c++/15/bits/unique_ptr.h \
+ /usr/include/c++/15/bits/shared_ptr.h \
+ /usr/include/c++/15/bits/shared_ptr_base.h \
+ /usr/include/c++/15/bits/allocated_ptr.h \
+ /usr/include/c++/15/ext/aligned_buffer.h \
+ /usr/include/c++/15/ext/concurrence.h \
+ /usr/include/c++/15/bits/shared_ptr_atomic.h \
+ /usr/include/c++/15/bits/atomic_base.h \
+ /usr/include/c++/15/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/15/backward/auto_ptr.h \
+ /usr/include/c++/15/pstl/glue_memory_defs.h \
+ /usr/include/c++/15/pstl/execution_defs.h /usr/include/c++/15/random \
+ /usr/include/c++/15/cstdint \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/stdint.h \
+ /usr/include/stdint.h /usr/include/bits/stdint-uintn.h \
+ /usr/include/bits/stdint-least.h /usr/include/c++/15/bits/random.h \
+ /usr/include/c++/15/vector /usr/include/c++/15/bits/stl_vector.h \
+ /usr/include/c++/15/bits/stl_bvector.h \
+ /usr/include/c++/15/bits/vector.tcc \
+ /usr/include/c++/15/bits/uniform_int_dist.h \
+ /usr/include/c++/15/x86_64-redhat-linux/bits/opt_random.h \
+ /usr/include/c++/15/bits/random.tcc /usr/include/c++/15/numeric \
+ /usr/include/c++/15/bits/stl_numeric.h \
+ /usr/include/c++/15/pstl/glue_numeric_defs.h \
+ /home/macsa/dev/raytracing/ray.h /home/macsa/dev/raytracing/vec3.h \
+ /usr/include/c++/15/algorithm /usr/include/c++/15/bits/stl_algo.h \
+ /usr/include/c++/15/bits/algorithmfwd.h \
+ /usr/include/c++/15/bits/stl_heap.h \
+ /usr/include/c++/15/pstl/glue_algorithm_defs.h \
+ /home/macsa/dev/raytracing/constant_medium.h \
+ /home/macsa/dev/raytracing/hittable.h /home/macsa/dev/raytracing/aabb.h \
+ /home/macsa/dev/raytracing/material.h \
+ /home/macsa/dev/raytracing/texture.h /home/macsa/dev/raytracing/perlin.h \
+ /home/macsa/dev/raytracing/rtw_stb_image.h \
+ /home/macsa/dev/raytracing/external/stb_image.h \
+ /usr/include/c++/15/stdlib.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/limits.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
+ /usr/include/bits/uio_lim.h /usr/include/string.h /usr/include/strings.h \
+ /usr/include/c++/15/math.h /usr/include/assert.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/emmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/xmmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/mmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/mm_malloc.h \
+ /home/macsa/dev/raytracing/quad.h \
+ /home/macsa/dev/raytracing/hittable_list.h \
+ /home/macsa/dev/raytracing/bvh.h /home/macsa/dev/raytracing/camera.h \
+ /usr/include/c++/15/atomic /usr/include/c++/15/execution \
+ /usr/include/c++/15/pstl/glue_execution_defs.h \
+ /usr/include/c++/15/pstl/algorithm_impl.h /usr/include/c++/15/iterator \
+ /usr/include/c++/15/bits/stream_iterator.h /usr/include/c++/15/utility \
+ /usr/include/c++/15/bits/stl_relops.h /usr/include/c++/15/functional \
+ /usr/include/c++/15/bits/std_function.h \
+ /usr/include/c++/15/unordered_map \
+ /usr/include/c++/15/bits/unordered_map.h \
+ /usr/include/c++/15/bits/hashtable.h \
+ /usr/include/c++/15/bits/hashtable_policy.h \
+ /usr/include/c++/15/bits/enable_special_members.h \
+ /usr/include/c++/15/bits/node_handle.h \
+ /usr/include/c++/15/bits/erase_if.h /usr/include/c++/15/array \
+ /usr/include/c++/15/compare /usr/include/c++/15/pstl/execution_impl.h \
+ /usr/include/c++/15/pstl/memory_impl.h \
+ /usr/include/c++/15/pstl/unseq_backend_simd.h \
+ /usr/include/c++/15/pstl/utils.h \
+ /usr/include/c++/15/pstl/parallel_backend_utils.h \
+ /usr/include/c++/15/pstl/parallel_backend.h \
+ /usr/include/c++/15/pstl/parallel_backend_tbb.h \
+ /usr/include/tbb/blocked_range.h /usr/include/oneapi/tbb/blocked_range.h \
+ /usr/include/oneapi/tbb/detail/_range_common.h \
+ /usr/include/oneapi/tbb/detail/_config.h /usr/include/c++/15/version \
+ /usr/include/oneapi/tbb/detail/_export.h \
+ /usr/include/oneapi/tbb/detail/_utils.h \
+ /usr/include/oneapi/tbb/detail/_assert.h \
+ /usr/include/oneapi/tbb/detail/_machine.h /usr/include/c++/15/climits \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/immintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/x86gprintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/ia32intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/adxintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/bmiintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/bmi2intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/cetintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/cldemoteintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/clflushoptintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/clwbintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/clzerointrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/cmpccxaddintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/enqcmdintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/fxsrintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/lzcntintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/lwpintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/movdirintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/mwaitintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/mwaitxintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/pconfigintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/popcntintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/pkuintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/prfchiintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/raointintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/rdseedintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/rtmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/serializeintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/sgxintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/tbmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/tsxldtrkintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/uintrintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/waitpkgintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/wbnoinvdintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/xsaveintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/xsavecintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/xsaveoptintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/xsavesintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/xtestintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/hresetintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/usermsrintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/pmmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/tmmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/smmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/wmmintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avxintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avxvnniintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avxifmaintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avxvnniint8intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avxvnniint16intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx2intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512fintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512cdintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512bwintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512dqintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vlbwintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vldqintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512ifmaintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512ifmavlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vbmiintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vbmivlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vpopcntdqintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vbmi2intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vbmi2vlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vnniintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vnnivlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vpopcntdqvlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512bitalgintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512bitalgvlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vp2intersectintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512vp2intersectvlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512fp16intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512fp16vlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/shaintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/sm3intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/sha512intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/sm4intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/fmaintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/f16cintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/gfniintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/vaesintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/vpclmulqdqintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512bf16vlintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx512bf16intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avxneconvertintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxtileintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxint8intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxbf16intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxcomplexintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxavx512intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxtf32intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxtransposeintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxfp8intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/prfchwintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/keylockerintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxfp16intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2mediaintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2-512mediaintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2convertintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2-512convertintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2bf16intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2-512bf16intrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2satcvtintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2-512satcvtintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2minmaxintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2-512minmaxintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/avx10_2copyintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/movrsintrin.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/amxmovrsintrin.h \
+ /usr/include/c++/15/thread /usr/include/c++/15/bits/std_thread.h \
+ /usr/include/c++/15/bits/this_thread_sleep.h \
+ /usr/include/c++/15/bits/chrono.h /usr/include/c++/15/ratio \
+ /usr/include/c++/15/ctime /usr/include/c++/15/bits/parse_numbers.h \
+ /usr/include/oneapi/tbb/detail/_namespace_injection.h \
+ /usr/include/oneapi/tbb/version.h \
+ /usr/include/oneapi/tbb/detail/_config.h /usr/include/tbb/parallel_for.h \
+ /usr/include/oneapi/tbb/parallel_for.h \
+ /usr/include/oneapi/tbb/detail/_exception.h \
+ /usr/include/oneapi/tbb/detail/_task.h \
+ /usr/include/oneapi/tbb/detail/_template_helpers.h \
+ /usr/include/oneapi/tbb/detail/_small_object_pool.h \
+ /usr/include/oneapi/tbb/profiling.h \
+ /usr/include/oneapi/tbb/detail/_string_resource.h \
+ /usr/include/c++/15/mutex /usr/include/c++/15/bits/std_mutex.h \
+ /usr/include/c++/15/bits/unique_lock.h \
+ /usr/include/oneapi/tbb/detail/_small_object_pool.h \
+ /usr/include/oneapi/tbb/profiling.h \
+ /usr/include/oneapi/tbb/partitioner.h \
+ /usr/include/oneapi/tbb/detail/_aligned_space.h \
+ /usr/include/oneapi/tbb/detail/_utils.h \
+ /usr/include/oneapi/tbb/detail/_template_helpers.h \
+ /usr/include/oneapi/tbb/cache_aligned_allocator.h \
+ /usr/include/c++/15/memory_resource /usr/include/c++/15/shared_mutex \
+ /usr/include/oneapi/tbb/task_group.h \
+ /usr/include/oneapi/tbb/detail/_assert.h \
+ /usr/include/oneapi/tbb/detail/_intrusive_list_node.h \
+ /usr/include/oneapi/tbb/detail/_task_handle.h \
+ /usr/include/oneapi/tbb/detail/_task.h \
+ /usr/include/oneapi/tbb/task_arena.h \
+ /usr/include/oneapi/tbb/detail/_attach.h /usr/include/oneapi/tbb/info.h \
+ /usr/include/oneapi/tbb/blocked_range.h \
+ /usr/include/tbb/parallel_reduce.h \
+ /usr/include/oneapi/tbb/parallel_reduce.h \
+ /usr/include/tbb/parallel_scan.h /usr/include/oneapi/tbb/parallel_scan.h \
+ /usr/include/tbb/parallel_invoke.h \
+ /usr/include/oneapi/tbb/parallel_invoke.h /usr/include/tbb/task_arena.h \
+ /usr/include/oneapi/tbb/task_arena.h /usr/include/tbb/tbb_allocator.h \
+ /usr/include/oneapi/tbb/tbb_allocator.h \
+ /usr/include/oneapi/tbb/detail/_utils.h /usr/include/tbb/task.h \
+ /usr/include/oneapi/tbb/task.h /usr/include/c++/15/pstl/parallel_impl.h \
+ /usr/include/c++/15/pstl/numeric_impl.h \
+ /usr/include/c++/15/pstl/pstl_config.h \
+ /usr/include/c++/15/pstl/algorithm_fwd.h \
+ /usr/include/c++/15/pstl/glue_algorithm_impl.h \
+ /usr/include/c++/15/pstl/numeric_fwd.h \
+ /usr/include/c++/15/pstl/glue_numeric_impl.h \
+ /usr/include/c++/15/pstl/glue_memory_impl.h \
+ /home/macsa/dev/raytracing/sphere.h /usr/include/c++/15/csetjmp \
+ /usr/include/setjmp.h

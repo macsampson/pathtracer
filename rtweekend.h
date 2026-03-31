@@ -2,10 +2,10 @@
 #define RTWEEKEND_H
 
 #include <cmath>
-#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <random>
 
 using std::make_shared;
 using std::shared_ptr;
@@ -18,9 +18,11 @@ inline double degrees_to_radians(double degrees) {
 	return degrees * pi / 180.0;
 }
 
-// Returns a random double in [0, 1).
+// Returns a random double in [0, 1). Updated to use thread-safe rng
 inline double random_double() {
-	return std::rand() / (RAND_MAX + 1.0);
+	thread_local std::mt19937 rng{std::random_device{}()};
+	thread_local std::uniform_real_distribution<double> dist(0.0, 1.0);
+	return dist(rng);
 }
 
 // Returns a random double in [min, max).
