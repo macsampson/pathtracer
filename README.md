@@ -3,7 +3,7 @@
 A C++ Monte Carlo path tracer that simulates physically-based light transport to produce photorealistic renders.
 
 <p align="center">
-  <img src="gallery/portfolio1.png" alt="Cornell Box — 10000 SPP" width="600"/>
+  <img src="gallery/portfolio1.png" alt="Cornell Box — 10000 SPP" width="600"/><br/>
   <sub><b>Cornell Box</b> — 10000 SPP, 800x800</sub>
 </p>
 
