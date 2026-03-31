@@ -1,3 +1,0 @@
-/home/macsa/dev/raytracing/build/CMakeFiles/raytracing.dir
-/home/macsa/dev/raytracing/build/CMakeFiles/edit_cache.dir
-/home/macsa/dev/raytracing/build/CMakeFiles/rebuild_cache.dir

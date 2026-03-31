@@ -5,6 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(TBB REQUIRED)
 
-add_executable(raytracing main.cpp)
+add_executable(raytracing src/main.cpp)
+
+target_include_directories(raytracing PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}
+)
+
 target_compile_options(raytracing PRIVATE -O3)
 target_link_libraries(raytracing TBB::tbb)

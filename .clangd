@@ -6,3 +6,7 @@
 #     - "typename_nested_not_found"
 Completion:
   AllScopes: true
+CompileFlags:
+  Add:
+    - "-Isrc"
+    - "-I."
