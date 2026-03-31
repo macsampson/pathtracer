@@ -11,8 +11,12 @@
 #include "geometry/sphere.h"
 #include "materials/texture.h"
 #include "rendering/camera.h"
-#include <iostream>
 #include <memory>
+#include <string>
+#include <vector>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "external/stb_image_write.h"
 
 using std::make_shared;
 
@@ -23,11 +27,12 @@ void perlin_spheres(int image_width, int samples_per_pixel, int max_depth);
 void quads(int image_width, int samples_per_pixel, int max_depth);
 void light_testing(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box(int image_width, int samples_per_pixel, int max_depth);
-void cornell_box_volumes(int image_width, int samples_per_pixel, int max_depth);
+void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
 
-int main() {
-	switch (7) {
+int main(int argc, char* argv[]) {
+	std::string output_file = (argc > 1) ? argv[1] : "output.png";
+	switch (8) {
 	case 1:
 		space(1600, 10000, 20);
 		break;
@@ -47,10 +52,10 @@ int main() {
 		light_testing(800, 1000, 50);
 		break;
 	case 7:
-		cornell_box(400, 1000, 50);
+		cornell_box(400, 500, 50);
 		break;
 	case 8:
-		cornell_box_volumes(800, 200, 50);
+		cornell_box_mirrors(400, 500, 50);
 		break;
 	case 9:
 		cornell_box_2(800, 10000, 40);
@@ -440,31 +445,104 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth) {
 	cam.render(world);
 }
 
-void cornell_box_volumes(int image_width, int samples_per_pixel, int max_depth) {
+void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
 	auto white = make_shared<lambertian>(color(.73, .73, .73));
 	auto green = make_shared<lambertian>(color(.12, .45, .15));
-	auto light = make_shared<diffuse_light>(color(15, 15, 15));
+	auto light = make_shared<diffuse_light>(color(3, 5, 20));
+	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
+	auto green_metal = make_shared<metal>(color(.12, .45, .15), 0);
 
-	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
-	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
 	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
-	shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 165, 165), white);
-	box1 = make_shared<rotate_y>(box1, -18);
-	box1 = make_shared<translate>(box1, vec3(130, 0, 65));
+	const double radius = 75;
+	std::vector<point3> placed;
 
-	shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 330, 165), white);
-	box2 = make_shared<rotate_y>(box2, 15);
-	box2 = make_shared<translate>(box2, vec3(295, 0, 295));
+	for (int a = 0; a < 5; a++) {
+		for (int b = 0; b < 5; b++) {
+			auto choose_mat = random_double();
+			point3 center(80 + a * 100 + random_double(-20, 20), random_double(radius, 555 - radius),
+						  80 + b * 100 + random_double(-20, 20));
 
-	world.add(make_shared<constant_medium>(box1, 0.01, color(1, 1, 1)));
-	world.add(make_shared<constant_medium>(box2, 0.01, color(0, 0, 0)));
+			bool overlaps = false;
+
+			for (const auto& other : placed) {
+				if ((center - other).length() < 2 * radius) {
+					overlaps = true;
+					break;
+				}
+			}
+
+			if (overlaps)
+				continue;
+			placed.push_back(center);
+
+			shared_ptr<material> sphere_material;
+			color volume_albedo;
+			double volume_density = 0;
+			bool volume = false;
+
+			if (choose_mat < 0.0) {
+				// choose diffuse
+				auto albedo = color::random() * color::random();
+				sphere_material = make_shared<lambertian>(albedo);
+			} else if (choose_mat < 0.3) {
+				// choose metal
+				auto albedo = color::random(0.5, 1);
+				auto fuzz = random_double(0, 0.1);
+				sphere_material = make_shared<metal>(albedo, fuzz);
+			} else if (choose_mat < 0.4) {
+				// emissive
+				auto albedo = color::random(0.5, 5.0);
+				sphere_material = make_shared<diffuse_light>(albedo);
+			} else if (choose_mat < 0.75) {
+				// volume
+				volume_albedo = color::random(0, 1);
+				volume_density = random_double(0.05, 0.15);
+				volume = true;
+			} else {
+				// glass
+				sphere_material = make_shared<dielectric>(1.5);
+			}
+
+			shared_ptr<hittable> s = make_shared<sphere>(center, radius, sphere_material);
+			if (volume)
+				world.add(make_shared<constant_medium>(s, volume_density, volume_albedo));
+			else
+				world.add(s);
+		}
+	}
+
+	// shared_ptr<hittable> glass_sphere
+	// 	= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<dielectric>(1.5));
+	// // box1 = make_shared<rotate_y>(box1, -18);
+	// glass_sphere = make_shared<translate>(glass_sphere, vec3(450, 225, 30));
+	// world.add(glass_sphere);
+
+	// shared_ptr<hittable> lambertian_sphere
+	// 	= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<lambertian>(color(0.7, 0.95, 1.0)));
+	// // box1 = make_shared<rotate_y>(box1, -18);
+	// lambertian_sphere = make_shared<translate>(lambertian_sphere, vec3(400, 225, 130));
+	// world.add(lambertian_sphere);
+
+	// shared_ptr<hittable> metal_sphere
+	// 	= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<metal>(color(0.5, 0.5, 0.5), 0));
+	// // box1 = make_shared<rotate_y>(box1, -18);
+	// metal_sphere = make_shared<translate>(metal_sphere, vec3(350, 225, 205));
+	// world.add(metal_sphere);
+
+	// shared_ptr<hittable> large_glass_sphere
+	// 	= make_shared<sphere>(point3(0, 0, 0), 150, make_shared<dielectric>(1.5));
+	// // box1 = make_shared<rotate_y>(box1, -18);
+	// large_glass_sphere = make_shared<translate>(large_glass_sphere, vec3(250, 150, 300));
+	// world.add(large_glass_sphere);
 
 	camera cam;
 

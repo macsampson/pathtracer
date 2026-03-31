@@ -3,9 +3,9 @@
 
 #include "core/color.h"
 #include "core/interval.h"
-#include "materials/perlin.h"
-#include "rendering/rtw_stb_image.h"
 #include "core/vec3.h"
+#include "materials/perlin.h"
+#include "rendering/wrap_stb_image.h"
 #include <memory>
 
 class texture {

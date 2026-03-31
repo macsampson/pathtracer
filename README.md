@@ -3,7 +3,7 @@
 A C++ Monte Carlo path tracer that simulates physically-based light transport to produce photorealistic renders.
 
 <p align="center">
-  <img src="renders/portfolio1.png" alt="Cornell Box — 10000 SPP" width="600"/>
+  <img src="gallery/portfolio1.png" alt="Cornell Box — 10000 SPP" width="600"/>
 </p>
 
 ---
@@ -26,7 +26,7 @@ A C++ Monte Carlo path tracer that simulates physically-based light transport to
 <table>
   <tr>
     <td align="center">
-      <img src="renders/portfolio2.png" width="380"/><br/>
+      <img src="gallery/portfolio2.png" width="380"/><br/>
       <sub><b>Earth, Moon & Mars</b> — Spherical UV mapping with texture data. 10000 SPP, 1600x900</sub>
     </td>
   </tr>

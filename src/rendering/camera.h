@@ -4,9 +4,14 @@
 #include "core/color.h"
 #include "core/rtweekend.h"
 #include "core/vec3.h"
+#include "external/stb_image_write.h"
 #include "geometry/hittable.h"
 #include <atomic>
+#include <chrono>
 #include <cmath>
+#include <ctime>
+#include <filesystem>
+#include <string>
 #include <tbb/blocked_range2d.h>
 #include <tbb/parallel_for.h>
 #include <vector>
@@ -29,8 +34,18 @@ class camera {
 	double focus_dist = 10;	  // Distance from camera lookfrom to plane of perfect focus
 
 	// Renders the scene to stdout as a PPM image by shooting samples_per_pixel rays per pixel.
-	void render(const hittable& world) {
+	void render(const hittable& world, const std::string& filename = "output.png") {
 		initialize();
+		std::time_t t = std::time(nullptr);
+		char timestamp[16];
+		std::strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", std::localtime(&t));
+
+		std::filesystem::create_directories("renders");
+		auto dot = filename.find_last_of('.');
+		std::string stem = (dot == std::string::npos) ? filename : filename.substr(0, dot);
+		std::string ext = (dot == std::string::npos) ? "" : filename.substr(dot);
+		std::string out_file
+			= "renders/" + stem + "_" + timestamp + "_" + std::to_string(samples_per_pixel) + "spp" + ext;
 		// Multithreading the rendering of each row
 		std::vector<color> framebuffer(image_width * image_height);
 
@@ -73,12 +88,26 @@ class camera {
 		// 		std::clog << "\rScanlines done: " << done << "/" << image_height << std::flush;
 		// });
 
+		// for (int j = 0; j < image_height; j++) {
+		// 	for (int i = 0; i < image_width; i++) {
+
+		// 		write_color(std::cout, framebuffer[j * image_width + i]);
+		// 	}
+		// }
+
+		std::vector<uint8_t> pixels(image_width * image_height * 3);
 		for (int j = 0; j < image_height; j++) {
 			for (int i = 0; i < image_width; i++) {
-
-				write_color(std::cout, framebuffer[j * image_width + i]);
+				const color& c = framebuffer[j * image_width + i];
+				int idx = (j * image_width + i) * 3;
+				static const interval intensity(0.000, 0.999);
+				pixels[idx + 0] = uint8_t(256 * intensity.clamp(linear_to_gamma(c.x())));
+				pixels[idx + 1] = uint8_t(256 * intensity.clamp(linear_to_gamma(c.y())));
+				pixels[idx + 2] = uint8_t(256 * intensity.clamp(linear_to_gamma(c.z())));
 			}
 		}
+		stbi_write_png(out_file.c_str(), image_width, image_height, 3, pixels.data(), image_width * 3);
+		std::clog << "\nSaved " << filename << "\n";
 	}
 
   private:
