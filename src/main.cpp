@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 		cornell_box(400, 500, 50);
 		break;
 	case 8:
-		cornell_box_mirrors(400, 500, 50);
+		cornell_box_mirrors(600, 1000, 50);
 		break;
 	case 9:
 		cornell_box_2(800, 10000, 40);
@@ -498,14 +498,14 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 				auto albedo = color::random(0.5, 1);
 				auto fuzz = random_double(0, 0.1);
 				sphere_material = make_shared<metal>(albedo, fuzz);
-			} else if (choose_mat < 0.4) {
+			} else if (choose_mat < 0.5) {
 				// emissive
 				auto albedo = color::random(0.5, 5.0);
 				sphere_material = make_shared<diffuse_light>(albedo);
 			} else if (choose_mat < 0.75) {
 				// volume
 				volume_albedo = color::random(0, 1);
-				volume_density = random_double(0.05, 0.15);
+				volume_density = random_double(0.01, 0.1);
 				volume = true;
 			} else {
 				// glass

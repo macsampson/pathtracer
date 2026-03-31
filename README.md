@@ -12,7 +12,7 @@ A C++ Monte Carlo path tracer that simulates physically-based light transport to
 
 - **Physically-Based Materials** — Lambertian diffuse, specular metal with Schlick–Fresnel approximation, dielectric refraction (Snell's Law) with total internal reflection
 - **BVH Acceleration** — Bounding Volume Hierarchy with AABB slab-method ray tests; reduces scene traversal from O(n) to O(log n)
-- **Multithreading** — Parallel rendering via Intel TBB; ~3.75× speedup over sequential on a multi-core CPU
+- **Multithreading** — Parallel tile-based rendering via Intel TBB; ~3.75× speedup over sequential on a multi-core CPU
 - **Optical Effects** — Depth-of-field (defocus disk sampling), motion blur (time-parameterized intersection), area lighting
 - **Procedural Textures** — Perlin noise with trilinear interpolation, Hermite smoothing, and multi-octave turbulence
 - **Image Textures** — UV-mapped JPG/PNG via stb_image (earth, moon, mars surfaces)
@@ -26,8 +26,14 @@ A C++ Monte Carlo path tracer that simulates physically-based light transport to
 <table>
   <tr>
     <td align="center">
-      <img src="gallery/portfolio2.png" width="380"/><br/>
+      <img src="gallery/portfolio2.png" width="600"/><br/>
       <sub><b>Earth, Moon & Mars</b> — Spherical UV mapping with texture data. 10000 SPP, 1600x900</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="gallery/portfolio3.png" width="600"/><br/>
+      <sub><b>Randomized Cornell Box</b> — 1000 SPP, 600x600</sub>
     </td>
   </tr>
 </table>
