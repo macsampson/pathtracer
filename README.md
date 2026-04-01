@@ -13,7 +13,7 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
 
 - **Physically-Based Materials**: Lambertian diffuse, specular metal with Schlick–Fresnel approximation, dielectric refraction (Snell's Law) with total internal reflection, constant medium volumetrics
 - **BVH Acceleration**: Bounding Volume Hierarchy with AABB slab-method ray tests; reduces scene traversal from O(n) to O(log n)
-- **Multithreading**: Parallel tile-based rendering via Intel TBB; ~3.75× speedup over sequential on a multi-core CPU
+- **Multithreading**: Parallel tile-based rendering via Intel TBB; ~4× speedup over sequential on a multi-core CPU
 - **Optical Effects**: Depth-of-field (defocus disk sampling), motion blur (time-parameterized intersection), area lighting
 - **Procedural Textures**: Perlin noise with trilinear interpolation, Hermite smoothing, and multi-octave turbulence
 - **Image Textures**: UV-mapped JPG/PNG via stb_image library
