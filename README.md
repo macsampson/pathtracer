@@ -1,6 +1,6 @@
 # Software Path Tracer
 
-A C++ Monte Carlo path tracer that simulates physically-based light transport to produce photorealistic renders.
+A C++ Monte Carlo path tracer that simulates physically-based light propagation to produce photorealistic renders.
 
 <p align="center">
   <img src="gallery/portfolio1.png" alt="Cornell Box — 10000 SPP" width="600"/><br/>
