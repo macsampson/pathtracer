@@ -32,7 +32,7 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
 
 int main(int argc, char* argv[]) {
 	std::string output_file = (argc > 1) ? argv[1] : "output.png";
-	switch (9) {
+	switch (8) {
 	case 1:
 		space(1600, 10000, 20);
 		break;
@@ -55,10 +55,10 @@ int main(int argc, char* argv[]) {
 		cornell_box(400, 500, 50);
 		break;
 	case 8:
-		cornell_box_mirrors(500, 500, 50);
+		cornell_box_mirrors(600, 10000, 50);
 		break;
 	case 9:
-		cornell_box_2(500, 500, 40);
+		cornell_box_2(600, 7000, 50);
 		break;
 	}
 }
@@ -451,7 +451,7 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
 	auto white = make_shared<lambertian>(color(.73, .73, .73));
 	auto green = make_shared<lambertian>(color(.12, .45, .15));
-	auto light = make_shared<diffuse_light>(color(3, 5, 20));
+	auto light = make_shared<diffuse_light>(color(2, 5, 20));
 	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
 	auto green_metal = make_shared<metal>(color(.12, .45, .15), 0);
 
@@ -468,8 +468,9 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 	for (int a = 0; a < 5; a++) {
 		for (int b = 0; b < 5; b++) {
 			auto choose_mat = random_double();
-			point3 center(radius + (a * 100) + random_double(0, 30), random_double(radius, 555 - radius),
-						  radius + (b * 100) + random_double(0, 30));
+			double cx = std::clamp(radius + (a * 100) + random_double(0, 30), radius, 555.0 - radius);
+			double cz = std::clamp(radius + (b * 100) + random_double(0, 30), radius, 555.0 - radius);
+			point3 center(cx, random_double(radius, 555 - radius), cz);
 
 			bool overlaps = false;
 
@@ -503,7 +504,7 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 				// emissive
 				auto albedo = color::random(0.1, 1.5);
 				sphere_material = make_shared<diffuse_light>(albedo);
-			} else if (choose_mat < 0.8) {
+			} else if (choose_mat < 0.65) {
 				// volume
 				volume_albedo = color::random(0, 1);
 				volume_density = random_double(0.01, 0.1);
