@@ -32,7 +32,7 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
 
 int main(int argc, char* argv[]) {
 	std::string output_file = (argc > 1) ? argv[1] : "output.png";
-	switch (3) {
+	switch (9) {
 	case 1:
 		space(1600, 10000, 20);
 		break;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 		cornell_box_mirrors(500, 500, 50);
 		break;
 	case 9:
-		cornell_box_2(800, 10000, 40);
+		cornell_box_2(500, 500, 40);
 		break;
 	}
 }
