@@ -31,34 +31,38 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
 
 int main(int argc, char* argv[]) {
-	std::string output_file = (argc > 1) ? argv[1] : "output.png";
-	switch (8) {
+	// std::string output_file = (argc > 1) ? argv[1] : "output.png";
+	int image_width = (argc > 1) ? std::stoi(argv[1]) : 100;
+	int samples_per_pixel = (argc > 2) ? std::stoi(argv[2]) : 100;
+	int max_depth = (argc > 3) ? std::stoi(argv[3]) : 30;
+
+	switch (9) {
 	case 1:
-		space(1600, 10000, 20);
+		space(image_width, samples_per_pixel, max_depth);
 		break;
 	case 2:
-		scene2(400, 100, 50);
+		scene2(image_width, samples_per_pixel, max_depth);
 		break;
 	case 3:
-		cube_room(500, 200, 50);
+		cube_room(image_width, samples_per_pixel, max_depth);
 		break;
 	case 4:
-		perlin_spheres(800, 1000, 50);
+		perlin_spheres(image_width, samples_per_pixel, max_depth);
 		break;
 	case 5:
-		quads(400, 100, 50);
+		quads(image_width, samples_per_pixel, max_depth);
 		break;
 	case 6:
-		light_testing(800, 1000, 50);
+		light_testing(image_width, samples_per_pixel, max_depth);
 		break;
 	case 7:
-		cornell_box(400, 500, 50);
+		cornell_box(image_width, samples_per_pixel, max_depth);
 		break;
 	case 8:
-		cornell_box_mirrors(600, 10000, 50);
+		cornell_box_mirrors(image_width, samples_per_pixel, max_depth);
 		break;
 	case 9:
-		cornell_box_2(600, 7000, 50);
+		cornell_box_2(image_width, samples_per_pixel, max_depth);
 		break;
 	}
 }
@@ -381,28 +385,35 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth) {
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
 	auto white = make_shared<lambertian>(color(.73, .73, .73));
 	auto green = make_shared<lambertian>(color(.12, .45, .15));
-	auto light = make_shared<diffuse_light>(color(30, 30, 30));
+	auto light = make_shared<diffuse_light>(color(7, 7, 7));
 	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0.5);
 	auto green_metal = make_shared<metal>(color(.12, .45, .15), 0.5);
+	auto brushed_metal = make_shared<metal>(color(1.0, 1.0, 1.0), 0.05);
 
-	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
-	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
-	world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light));
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
 	shared_ptr<hittable> glass_sphere
-		= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<dielectric>(1.5));
+		= make_shared<sphere>(point3(0, 0, 0), 60, make_shared<dielectric>(1.5));
 	// box1 = make_shared<rotate_y>(box1, -18);
-	glass_sphere = make_shared<translate>(glass_sphere, vec3(150, 75, 200));
+	glass_sphere = make_shared<translate>(glass_sphere, vec3(170, 75, 150));
 	world.add(glass_sphere);
 
 	shared_ptr<hittable> mirror_sphere
-		= make_shared<sphere>(point3(0, 0, 0), 150, make_shared<metal>(color(0.5, 0.5, 0.5), 0));
+		= make_shared<sphere>(point3(0, 0, 0), 200, make_shared<metal>(color(0.5, 0.5, 0.5), 0));
 	// box1 = make_shared<rotate_y>(box1, -18);
-	mirror_sphere = make_shared<translate>(mirror_sphere, vec3(0, 555, 555));
+	mirror_sphere = make_shared<translate>(mirror_sphere, vec3(0, 277, 555));
 	world.add(mirror_sphere);
+
+	shared_ptr<hittable> secret_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 60, make_shared<metal>(color(0.5, 0.1, 0.5), 0));
+	// box1 = make_shared<rotate_y>(box1, -18);
+	secret_sphere = make_shared<translate>(secret_sphere, vec3(320, 60, 470));
+	world.add(secret_sphere);
 
 	// shared_ptr<hittable> cloud_sphere = make_shared<sphere>(point3(0, 0, 0), 100, white);
 	// // box1 = make_shared<rotate_y>(box1, -18);
@@ -412,11 +423,11 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth) {
 	shared_ptr<hittable> tall_yellow_box
 		= box(point3(0, 0, 0), point3(70, 300, 70), make_shared<metal>(color(0.5, 0.5, 0.0), 0.5));
 	tall_yellow_box = make_shared<rotate_y>(tall_yellow_box, -45);
-	tall_yellow_box = make_shared<translate>(tall_yellow_box, vec3(50, 0, 450));
-	world.add(make_shared<constant_medium>(tall_yellow_box, 0.05, color(1.0, 0.75, 0.2)));
+	tall_yellow_box = make_shared<translate>(tall_yellow_box, vec3(500, 0, 100));
+	world.add(make_shared<constant_medium>(tall_yellow_box, 0.02, color(1.0, 0.75, 0.2)));
 
 	shared_ptr<hittable> large_mirror_box
-		= box(point3(0, 0, 0), point3(200, 200, 200), make_shared<metal>(color(1.0, 1.0, 1.0), 0.1));
+		= box(point3(0, 0, 0), point3(200, 200, 200), make_shared<lambertian>(color(0.1, 0.3, 1.0)));
 	large_mirror_box = make_shared<rotate_y>(large_mirror_box, 45);
 	large_mirror_box = make_shared<translate>(large_mirror_box, vec3(250, 0, 300));
 	world.add(large_mirror_box);
@@ -457,7 +468,7 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
-	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
+	// world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
@@ -495,16 +506,16 @@ void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) 
 			// 	auto albedo = color::random() * color::random();
 			// 	sphere_material = make_shared<lambertian>(albedo);
 			// } else
-			if (choose_mat < 0.4) {
+			if (choose_mat < 0.25) {
 				// choose metal
 				auto albedo = color::random(0.05, 1);
 				auto fuzz = random_double(0, 0.1);
 				sphere_material = make_shared<metal>(albedo, fuzz);
-			} else if (choose_mat < 0.52) {
+			} else if (choose_mat < 0.5) {
 				// emissive
 				auto albedo = color::random(0.1, 1.5);
 				sphere_material = make_shared<diffuse_light>(albedo);
-			} else if (choose_mat < 0.65) {
+			} else if (choose_mat < 0.75) {
 				// volume
 				volume_albedo = color::random(0, 1);
 				volume_density = random_double(0.01, 0.1);
