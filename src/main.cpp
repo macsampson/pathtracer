@@ -27,8 +27,8 @@ void perlin_spheres(int image_width, int samples_per_pixel, int max_depth);
 void quads(int image_width, int samples_per_pixel, int max_depth);
 void light_testing(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box(int image_width, int samples_per_pixel, int max_depth);
-void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth);
-void cornell_box_2(int image_width, int samples_per_pixel, int max_depth);
+void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth);
+void cornell_variety(int image_width, int samples_per_pixel, int max_depth);
 
 int main(int argc, char* argv[]) {
 	// std::string output_file = (argc > 1) ? argv[1] : "output.png";
@@ -59,10 +59,10 @@ int main(int argc, char* argv[]) {
 		cornell_box(image_width, samples_per_pixel, max_depth);
 		break;
 	case 8:
-		cornell_box_mirrors(image_width, samples_per_pixel, max_depth);
+		cornell_random_spheres(image_width, samples_per_pixel, max_depth);
 		break;
 	case 9:
-		cornell_box_2(image_width, samples_per_pixel, max_depth);
+		cornell_variety(image_width, samples_per_pixel, max_depth);
 		break;
 	}
 }
@@ -379,7 +379,7 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
 	cam.render(world);
 }
 
-void cornell_box_2(int image_width, int samples_per_pixel, int max_depth) {
+void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -398,7 +398,7 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth) {
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
 	shared_ptr<hittable> glass_sphere
-		= make_shared<sphere>(point3(0, 0, 0), 60, make_shared<dielectric>(1.5));
+		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<dielectric>(1.5));
 	// box1 = make_shared<rotate_y>(box1, -18);
 	glass_sphere = make_shared<translate>(glass_sphere, vec3(170, 75, 150));
 	world.add(glass_sphere);
@@ -456,7 +456,7 @@ void cornell_box_2(int image_width, int samples_per_pixel, int max_depth) {
 	cam.render(world);
 }
 
-void cornell_box_mirrors(int image_width, int samples_per_pixel, int max_depth) {
+void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
