@@ -27,8 +27,8 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
 <table>
   <tr>
     <td align="center">
-      <img src="gallery/portfolio3.png" width="500"/><br/>
-      <sub><b>Randomized Sphere Cornell Box</b> - 3000 SPP, 500x500</sub>
+      <img src="gallery/portfolio3.png" width="600"/><br/>
+      <sub><b>Randomized Sphere Cornell Box</b> - 10000 SPP, 600x600</sub>
     </td>
   </tr>
   <tr>
