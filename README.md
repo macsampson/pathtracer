@@ -61,10 +61,30 @@ Benchmarks on the Cornell Box scene (400×400, 1000 SPP). Multithreading uses In
 ```bash
 cmake -B build
 cmake --build build
-./build/raytracing
 ```
 
-All renders are placed in the renders folder with timestamps and samples per pixel appended to filenames.
+## Usage
+
+```bash
+./build/raytracing [-s scene] [-w width] [--spp N] [-d depth] [--list]
+```
+
+| Flag | Description | Default |
+|---|---|---|
+| `-s`, `--scene` | Scene to render | `cornell_random` |
+| `-w`, `--width` | Image width in pixels | `100` |
+| `--spp` | Samples per pixel | `100` |
+| `-d`, `--depth` | Max ray bounce depth | `30` |
+| `--list` | List available scenes | — |
+
+**Available scenes:** `space`, `scene2`, `cube_room`, `perlin_spheres`, `quads`, `light_testing`, `cornell_box`, `cornell_random`, `cornell_variety`
+
+**Example:**
+```bash
+./build/raytracing -s cornell_box -w 500 --spp 1000 -d 50
+```
+
+All renders are placed in the `renders/` folder with timestamps and samples per pixel appended to filenames.
 
 ---
 
