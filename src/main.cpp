@@ -11,6 +11,7 @@
 #include "geometry/sphere.h"
 #include "materials/texture.h"
 #include "rendering/camera.h"
+#include <cstring>
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,41 +31,58 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth);
 void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth);
 void cornell_variety(int image_width, int samples_per_pixel, int max_depth);
 
-int main(int argc, char* argv[]) {
-	// std::string output_file = (argc > 1) ? argv[1] : "output.png";
-	int image_width = (argc > 1) ? std::stoi(argv[1]) : 100;
-	int samples_per_pixel = (argc > 2) ? std::stoi(argv[2]) : 100;
-	int max_depth = (argc > 3) ? std::stoi(argv[3]) : 30;
+struct Scene {
+	const char* name;
+	void (*fn)(int, int, int);
+};
 
-	switch (9) {
-	case 1:
-		space(image_width, samples_per_pixel, max_depth);
-		break;
-	case 2:
-		scene2(image_width, samples_per_pixel, max_depth);
-		break;
-	case 3:
-		cube_room(image_width, samples_per_pixel, max_depth);
-		break;
-	case 4:
-		perlin_spheres(image_width, samples_per_pixel, max_depth);
-		break;
-	case 5:
-		quads(image_width, samples_per_pixel, max_depth);
-		break;
-	case 6:
-		light_testing(image_width, samples_per_pixel, max_depth);
-		break;
-	case 7:
-		cornell_box(image_width, samples_per_pixel, max_depth);
-		break;
-	case 8:
-		cornell_random_spheres(image_width, samples_per_pixel, max_depth);
-		break;
-	case 9:
-		cornell_variety(image_width, samples_per_pixel, max_depth);
-		break;
+int main(int argc, char* argv[]) {
+	Scene scenes[] = {
+		{"space", space},
+		{"scene2", scene2},
+		{"cube_room", cube_room},
+		{"perlin_spheres", perlin_spheres},
+		{"quads", quads},
+		{"light_testing", light_testing},
+		{"cornell_box", cornell_box},
+		{"cornell_random", cornell_random_spheres},
+		{"cornell_variety", cornell_variety},
+	};
+
+	// Defaults
+	std::string scene_name = "cornell_random";
+	int image_width = 100;
+	int samples_per_pixel = 100;
+	int max_depth = 30;
+
+	for (int i = 1; i < argc; i++) {
+		std::string arg = argv[i];
+		if ((arg == "-s" || arg == "--scene") && i + 1 < argc)
+			scene_name = argv[++i];
+		else if ((arg == "-w" || arg == "--width") && i + 1 < argc)
+			image_width = std::stoi(argv[++i]);
+		else if (arg == "--spp" && i + 1 < argc)
+			samples_per_pixel = std::stoi(argv[++i]);
+		else if ((arg == "-d" || arg == "--depth") && i + 1 < argc)
+			max_depth = std::stoi(argv[++i]);
+		else if (arg == "--list") {
+			for (const auto& s : scenes)
+				std::cout << "  " << s.name << "\n";
+			return 0;
+		} else {
+			std::cerr << "Usage: raytracing [-s scene] [-w width] [--spp N] [-d depth] [--list]\n";
+			return 1;
+		}
 	}
+
+	for (const auto& s : scenes) {
+		if (scene_name == s.name) {
+			s.fn(image_width, samples_per_pixel, max_depth);
+			return 0;
+		}
+	}
+	std::cerr << "Unknown scene: " << scene_name << "\nUse --list to see available scenes.\n";
+	return 1;
 }
 
 void scene1(int image_width, int samples_per_pixel, int max_depth) {
@@ -396,6 +414,7 @@ void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+	// world.add(make_shared<quad>(point3(0, 0, ), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
 	shared_ptr<hittable> glass_sphere
 		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<dielectric>(1.5));
@@ -465,10 +484,11 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 	auto light = make_shared<diffuse_light>(color(2, 5, 20));
 	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
 	auto green_metal = make_shared<metal>(color(.12, .45, .15), 0);
+	auto white_metal = make_shared<metal>(color(0.5, 0.5, 0.5), 0.1);
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
-	// world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
+	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
@@ -476,60 +496,63 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 	const double radius = 75;
 	std::vector<point3> placed;
 
-	for (int a = 0; a < 5; a++) {
-		for (int b = 0; b < 5; b++) {
-			auto choose_mat = random_double();
-			double cx = std::clamp(radius + (a * 100) + random_double(0, 30), radius, 555.0 - radius);
-			double cz = std::clamp(radius + (b * 100) + random_double(0, 30), radius, 555.0 - radius);
-			point3 center(cx, random_double(radius, 555 - radius), cz);
+	while (placed.size() < 16) {
+		for (int a = 0; a < 7; a++) {
+			for (int b = 0; b < 7; b++) {
+				auto choose_mat = random_double();
+				double cx = std::clamp(radius + (a * 100) + random_double(0, 30), radius, 555.0 - radius);
+				double cz = std::clamp(radius + (b * 100) + random_double(0, 30), radius, 555.0 - radius);
+				point3 center(cx, random_double(radius, 555 - radius), cz);
 
-			bool overlaps = false;
+				bool overlaps = false;
 
-			for (const auto& other : placed) {
-				if ((center - other).length() < 2 * radius) {
-					overlaps = true;
-					break;
+				for (const auto& other : placed) {
+					if ((center - other).length() < 2 * radius) {
+						overlaps = true;
+						break;
+					}
 				}
+
+				if (overlaps)
+					continue;
+				placed.push_back(center);
+
+				shared_ptr<material> sphere_material;
+				color volume_albedo;
+				double volume_density = 0;
+				bool volume = false;
+
+				// if (choose_mat < 0.0) {
+				// 	// choose diffuse
+				// 	auto albedo = color::random() * color::random();
+				// 	sphere_material = make_shared<lambertian>(albedo);
+				// } else
+				if (choose_mat < 0.4) {
+					// choose metal
+					auto albedo = color::random(0.05, 1);
+					auto fuzz = random_double(0, 0.1);
+					sphere_material = make_shared<metal>(albedo, fuzz);
+				} else if (choose_mat < 0.5) {
+					// emissive
+					auto albedo = color::random(0.7, 5.0);
+					// auto albedo = color(0.2, 2.0, 3.0);
+					sphere_material = make_shared<diffuse_light>(albedo);
+				} else if (choose_mat < 0.6) {
+					// volume
+					volume_albedo = color::random(0, 1);
+					volume_density = random_double(0.1, 0.15);
+					volume = true;
+				} else {
+					// glass
+					sphere_material = make_shared<dielectric>(1.5);
+				}
+
+				shared_ptr<hittable> s = make_shared<sphere>(center, radius, sphere_material);
+				if (volume)
+					world.add(make_shared<constant_medium>(s, volume_density, volume_albedo));
+				else
+					world.add(s);
 			}
-
-			if (overlaps)
-				continue;
-			placed.push_back(center);
-
-			shared_ptr<material> sphere_material;
-			color volume_albedo;
-			double volume_density = 0;
-			bool volume = false;
-
-			// if (choose_mat < 0.0) {
-			// 	// choose diffuse
-			// 	auto albedo = color::random() * color::random();
-			// 	sphere_material = make_shared<lambertian>(albedo);
-			// } else
-			if (choose_mat < 0.25) {
-				// choose metal
-				auto albedo = color::random(0.05, 1);
-				auto fuzz = random_double(0, 0.1);
-				sphere_material = make_shared<metal>(albedo, fuzz);
-			} else if (choose_mat < 0.5) {
-				// emissive
-				auto albedo = color::random(0.1, 1.5);
-				sphere_material = make_shared<diffuse_light>(albedo);
-			} else if (choose_mat < 0.75) {
-				// volume
-				volume_albedo = color::random(0, 1);
-				volume_density = random_double(0.01, 0.1);
-				volume = true;
-			} else {
-				// glass
-				sphere_material = make_shared<dielectric>(1.5);
-			}
-
-			shared_ptr<hittable> s = make_shared<sphere>(center, radius, sphere_material);
-			if (volume)
-				world.add(make_shared<constant_medium>(s, volume_density, volume_albedo));
-			else
-				world.add(s);
 		}
 	}
 
