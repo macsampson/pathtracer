@@ -11,7 +11,6 @@
 #include "geometry/sphere.h"
 #include "materials/texture.h"
 #include "rendering/camera.h"
-#include <cstring>
 #include <memory>
 #include <string>
 #include <vector>
