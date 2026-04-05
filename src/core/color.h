@@ -1,9 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "core/interval.h"
 #include "core/rtweekend.h"
 #include "core/vec3.h"
-#include "core/interval.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +24,14 @@ inline void write_color(std::ostream& out, const color& pixel_color) {
 	auto r = pixel_color.x();
 	auto g = pixel_color.y();
 	auto b = pixel_color.z();
+
+	// replace NaN with zero
+	// if (r != r)
+	// 	r = 0.0;
+	// if (g != g)
+	// 	g = 0.0;
+	// if (b != b)
+	// 	b = 0.0;
 
 	// Apply a linear to gamma transform for gamma 2
 	r = linear_to_gamma(r);

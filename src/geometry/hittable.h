@@ -1,10 +1,10 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "geometry/aabb.h"
 #include "core/interval.h"
 #include "core/rtweekend.h"
 #include "core/vec3.h"
+#include "geometry/aabb.h"
 #include <cmath>
 #include <memory>
 
@@ -37,6 +37,16 @@ class hittable {
 	// Tests whether the ray r hits this object within the interval ray_t.
 	// If a hit is found, populates rec with hit details and returns true.
 	virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+
+	// returns a random point on the surface of a hittable
+	virtual vec3 random_point(const point3& origin) const {
+		return vec3(0, 0, 0);
+	};
+
+	// returns the pdf for a sampling direction from origin
+	virtual double pdf_value(const point3& origin, const vec3& dir) const {
+		return 0;
+	};
 
 	virtual aabb bounding_box() const = 0;
 };

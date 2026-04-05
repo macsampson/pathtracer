@@ -54,6 +54,26 @@ Benchmarks on the Cornell Box scene (400×400, 1000 SPP). Multithreading uses In
 
 ---
 
+### Direct Light Sampling
+
+For every ray hit on a diffuse surface, a light source is directly sampled. This means for each ray hit, we check the path from that point to a randomly chosen light source and determine if that path is occluded. If it isn't, we compute the direct illumination contribution for that point. 
+
+This results in far fewer samples per pixel being required to converge on the true illumination of a scene. Instead of a 1 in n chance of a scattered ray hitting a small light source, it is now guaranteed for diffuse materials. A comparison of each method at 1000 samples per pixel can be seen below.
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="gallery/naive_1000spp.png" width="500"/><br/>
+      <sub><b>Naive</b> - 1000 SPP, 500x500</sub>
+    </td>
+    <td align="center">
+      <img src="gallery/importance_sampling_1000spp.png" width="500"/><br/>
+      <sub><b>Direct Light Sampling</b> - 1000 SPP, 500x500</sub>
+    </td>
+  </tr>
+</table>
+
+
 ## Build
 
 **Dependencies:** CMake ≥ 3.10, C++17 compiler, Intel TBB

@@ -1,12 +1,13 @@
 #ifndef QUAD_H
 #define QUAD_H
 
+#include "core/interval.h"
+#include "core/ray.h"
+#include "core/rtweekend.h"
+#include "core/vec3.h"
 #include "geometry/aabb.h"
 #include "geometry/hittable.h"
 #include "geometry/hittable_list.h"
-#include "core/interval.h"
-#include "core/ray.h"
-#include "core/vec3.h"
 #include <cmath>
 #include <memory>
 // A parallelogram defined by a corner point Q and two edge vectors u and v.
@@ -27,19 +28,6 @@ class quad : public hittable {
 		w = n / dot(n, n);
 
 		set_bounding_box();
-	}
-
-	// Builds the AABB from both diagonals of the quad to handle axis-aligned quads
-	// (which would be degenerate if built from a single diagonal). aabb's pad_to_minimums
-	// handles any remaining zero-thickness axes.
-	virtual void set_bounding_box() {
-		auto bbox_diagonal1 = aabb(Q, Q + u + v);
-		auto bbox_diagonal2 = aabb(Q + u, Q + v);
-		bbox = aabb(bbox_diagonal1, bbox_diagonal2);
-	}
-
-	aabb bounding_box() const override {
-		return bbox;
 	}
 
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
@@ -74,6 +62,25 @@ class quad : public hittable {
 		return true;
 	}
 
+	vec3 random_point(const point3& origin) const override {
+		return Q + random_double() * u + random_double() * v;
+	}
+
+	double pdf_value(const point3& origin, const vec3& dir) const override {
+		hit_record rec;
+		if (!this->hit(ray(origin, dir), interval(0.0001, infinity), rec))
+			return 0;
+
+		double area = cross(u, v).length();
+		double distance_sq = rec.t * rec.t * dir.length_squared();
+		double cos_theta_light = std::fabs(dot(dir, normal)) / dir.length();
+
+		if (cos_theta_light < 1e-8)
+			return 0;
+
+		return distance_sq / (cos_theta_light * area);
+	}
+
 	// Returns true if (a, b) is inside the unit square [0,1]x[0,1].
 	// Also writes the uv texture coordinates into rec.
 	// Virtual so subclasses (e.g. disks, triangles) can override the interior test.
@@ -86,6 +93,19 @@ class quad : public hittable {
 		rec.u = a;
 		rec.v = b;
 		return true;
+	}
+
+	// Builds the AABB from both diagonals of the quad to handle axis-aligned quads
+	// (which would be degenerate if built from a single diagonal). aabb's pad_to_minimums
+	// handles any remaining zero-thickness axes.
+	virtual void set_bounding_box() {
+		auto bbox_diagonal1 = aabb(Q, Q + u + v);
+		auto bbox_diagonal2 = aabb(Q + u, Q + v);
+		bbox = aabb(bbox_diagonal1, bbox_diagonal2);
+	}
+
+	aabb bounding_box() const override {
+		return bbox;
 	}
 
   private:

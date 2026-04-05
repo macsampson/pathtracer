@@ -1,11 +1,11 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
-#include "geometry/aabb.h"
-#include "geometry/hittable.h"
 #include "core/interval.h"
 #include "core/ray.h"
 #include "core/rtweekend.h"
+#include "geometry/aabb.h"
+#include "geometry/hittable.h"
 
 #include <vector>
 
@@ -48,6 +48,21 @@ class hittable_list : public hittable {
 			}
 		}
 		return hit_anything;
+	}
+
+	vec3 random_point(const point3& origin) const override {
+		// Pick a random light uniformly
+		int idx = int(random_double() * objects.size());
+		idx = std::min(idx, (int)objects.size() - 1);
+		return objects[idx]->random_point(origin);
+	}
+
+	double pdf_value(const point3& origin, const vec3& dir) const override {
+		// Average PDF across all lights (mixture PDF)
+		double sum = 0;
+		for (const auto& obj : objects)
+			sum += obj->pdf_value(origin, dir);
+		return sum / objects.size();
 	}
 
 	aabb bounding_box() const override {

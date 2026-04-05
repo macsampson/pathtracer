@@ -24,6 +24,10 @@ class material {
 	virtual color emitted(double u, double v, const point3& p) const {
 		return color(0, 0, 0);
 	}
+
+	virtual bool is_diffuse() const {
+		return false;
+	}
 };
 
 class lambertian : public material {
@@ -46,6 +50,10 @@ class lambertian : public material {
 
 		scattered = ray(rec.point, scatter_direction, r_in.time());
 		attenuation = tex->value(rec.u, rec.v, rec.point);
+		return true;
+	}
+
+	bool is_diffuse() const override {
 		return true;
 	}
 };

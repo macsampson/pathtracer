@@ -24,11 +24,12 @@ void space(int image_width, int samples_per_pixel, int max_depth);
 void scene2(int image_width, int samples_per_pixel, int max_depth);
 void cube_room(int image_width, int samples_per_pixel, int max_depth);
 void perlin_spheres(int image_width, int samples_per_pixel, int max_depth);
-void quads(int image_width, int samples_per_pixel, int max_depth);
+void glass_cube(int image_width, int samples_per_pixel, int max_depth);
 void light_testing(int image_width, int samples_per_pixel, int max_depth);
 void cornell_box(int image_width, int samples_per_pixel, int max_depth);
 void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth);
 void cornell_variety(int image_width, int samples_per_pixel, int max_depth);
+// TODO: make a scene with a glass cube full of metal spheres.
 
 struct Scene {
 	const char* name;
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]) {
 		{"scene2", scene2},
 		{"cube_room", cube_room},
 		{"perlin_spheres", perlin_spheres},
-		{"quads", quads},
+		{"glass_cube", glass_cube},
 		{"light_testing", light_testing},
 		{"cornell_box", cornell_box},
 		{"cornell_random", cornell_random_spheres},
@@ -160,7 +161,8 @@ void scene1(int image_width, int samples_per_pixel, int max_depth) {
 	cam.defocus_angle = 0.6;
 	cam.focus_dist = 10.0;
 
-	cam.render(world);
+	hittable_list lights;
+	cam.render(world, lights);
 }
 
 void scene2(int image_width, int samples_per_pixel, int max_depth) {
@@ -187,7 +189,8 @@ void scene2(int image_width, int samples_per_pixel, int max_depth) {
 	cam.defocus_angle = 0;
 	// cam.focus_dist = 10.0;
 
-	cam.render(world);
+	hittable_list lights;
+	cam.render(world, lights);
 }
 
 void moon(int image_width, int samples_per_pixel, int max_depth) {
@@ -210,7 +213,8 @@ void moon(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
-	cam.render(hittable_list(globe));
+	hittable_list lights;
+	cam.render(hittable_list(globe), lights);
 }
 
 void space(int image_width, int samples_per_pixel, int max_depth) {
@@ -243,7 +247,11 @@ void space(int image_width, int samples_per_pixel, int max_depth) {
 	space.add(mars);
 
 	auto lighting = make_shared<diffuse_light>(color(40, 40, 20));
-	space.add(make_shared<sphere>(point3(20, 15, 0), 5, lighting));
+	auto light_sphere = make_shared<sphere>(point3(20, 15, 0), 5, lighting);
+	space.add(light_sphere);
+
+	hittable_list lights;
+	lights.add(light_sphere);
 
 	camera cam;
 
@@ -260,7 +268,7 @@ void space(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
-	cam.render(space);
+	cam.render(space, lights);
 }
 
 void perlin_spheres(int image_width, int samples_per_pixel, int max_depth) {
@@ -286,40 +294,110 @@ void perlin_spheres(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	hittable_list lights;
+	cam.render(world, lights);
 }
 
-void quads(int image_width, int samples_per_pixel, int max_depth) {
+void glass_cube(int image_width, int samples_per_pixel, int max_depth) {
 	hittable_list world;
 
-	auto red = make_shared<lambertian>(color(1.0, 0.2, 0.2));
-	auto green = make_shared<lambertian>(color(0.2, 1.0, 0.2));
-	auto blue = make_shared<lambertian>(color(0.2, 0.2, 1.0));
-	auto orange = make_shared<lambertian>(color(1.0, 0.5, 0.0));
-	auto teal = make_shared<lambertian>(color(0.2, 0.8, 0.8));
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(7, 7, 7));
+	auto material_glass = make_shared<dielectric>(1.50);
+	auto material_bubble = make_shared<dielectric>(1.00 / 1.50);
+	auto metal_mat = make_shared<metal>(color(0.8, 0.8, 0.9), 0.0);
+	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0.5);
+	auto green_metal = make_shared<metal>(color(.12, .45, .15), 0.5);
 
-	world.add(make_shared<quad>(point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0), red));
-	world.add(make_shared<quad>(point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0), green));
-	world.add(make_shared<quad>(point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0), blue));
-	world.add(make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), orange));
-	world.add(make_shared<quad>(point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4), teal));
+	double cube_size = 230;
+	double inner_cube_size = 0.9 * cube_size;
+	double offset = (cube_size - inner_cube_size) / 2.0;
+
+	// Shared rotation and translation for both cubes and spheres
+	double rot_angle = 20;
+	vec3 translate_pos(135, 165, 165);
+
+	// Cornell box walls
+	// world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
+	// world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
+	world.add(light_quad);
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	hittable_list lights;
+	lights.add(light_quad);
+
+	// Outer glass cube
+	shared_ptr<hittable> box1
+		= box(point3(0, 0, 0), point3(cube_size, cube_size, cube_size), material_glass);
+	box1 = make_shared<rotate_y>(box1, rot_angle);
+	box1 = make_shared<translate>(box1, translate_pos);
+	world.add(box1);
+
+	// Inner bubble cube (centered inside outer)
+	shared_ptr<hittable> box2
+		= box(point3(offset, offset, offset),
+			  point3(offset + inner_cube_size, offset + inner_cube_size, offset + inner_cube_size),
+			  material_bubble);
+	box2 = make_shared<rotate_y>(box2, rot_angle);
+	box2 = make_shared<translate>(box2, translate_pos);
+	world.add(box2);
+
+	// FCC close-packed metal spheres inside inner cube
+	double sphere_radius = 20;
+	double a = 2.0 * sqrt(2.0) * sphere_radius; // FCC lattice parameter
+
+	// FCC basis: 4 atoms per unit cell (fractional coordinates)
+	double basis[4][3] = {
+		{0.0, 0.0, 0.0},
+		{0.5, 0.5, 0.0},
+		{0.5, 0.0, 0.5},
+		{0.0, 0.5, 0.5},
+	};
+
+	double inner_min = offset + sphere_radius;
+	double inner_max = offset + inner_cube_size - sphere_radius;
+	int cells = static_cast<int>(ceil(inner_cube_size / a)) + 1;
+
+	for (int i = 0; i < cells; i++) {
+		for (int j = 0; j < cells; j++) {
+			for (int k = 0; k < cells; k++) {
+				for (int b = 0; b < 4; b++) {
+					double x = offset + (i + basis[b][0]) * a;
+					double y = offset + (j + basis[b][1]) * a;
+					double z = offset + (k + basis[b][2]) * a;
+
+					if (x >= inner_min && x <= inner_max && y >= inner_min && y <= inner_max
+						&& z >= inner_min && z <= inner_max) {
+						shared_ptr<hittable> s = make_shared<sphere>(
+							point3(x, y, z), sphere_radius, make_shared<metal>(color::random(), 0.0));
+						s = make_shared<rotate_y>(s, rot_angle);
+						s = make_shared<translate>(s, translate_pos);
+						world.add(s);
+					}
+				}
+			}
+		}
+	}
 
 	camera cam;
 
-	cam.aspect_ratio = 16.0 / 9.0;
+	cam.aspect_ratio = 1.0;
 	cam.image_width = image_width;
 	cam.samples_per_pixel = samples_per_pixel;
 	cam.max_depth = max_depth;
-	cam.background = color(0.7, 0.80, 1.00);
+	cam.background = color(0, 0, 0);
 
-	cam.vfov = 80;
-	cam.lookfrom = point3(0, 0, 9);
-	cam.lookat = point3(0, 0, 0);
+	cam.vfov = 40;
+	cam.lookfrom = point3(900, 278, -500);
+	cam.lookat = point3(500, 278, 0);
 	cam.vup = vec3(0, 1, 0);
 
-	cam.defocus_angle = 0;
-
-	cam.render(world);
+	cam.render(world, lights);
 }
 
 void light_testing(int image_width, int samples_per_pixel, int max_depth) {
@@ -332,8 +410,12 @@ void light_testing(int image_width, int samples_per_pixel, int max_depth) {
 	world.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
 
 	auto lighting = make_shared<diffuse_light>(color(20, 20, 20));
-	world.add(make_shared<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), lighting));
+	auto light_quad = make_shared<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), lighting);
+	world.add(light_quad);
 	// world.add(make_shared<sphere>(point3(7, 7, 0), 1, lighting));
+
+	hittable_list lights;
+	lights.add(light_quad);
 
 	camera cam;
 
@@ -350,7 +432,7 @@ void light_testing(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	cam.render(world, lights);
 }
 
 void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
@@ -363,10 +445,14 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
-	world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light));
+	auto light_quad = make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(light_quad);
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	hittable_list lights;
+	lights.add(light_quad);
 
 	shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 165, 165), white);
 	box1 = make_shared<rotate_y>(box1, -18);
@@ -393,7 +479,7 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	cam.render(world, lights);
 }
 
 void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
@@ -409,11 +495,15 @@ void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
-	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
+	world.add(light_quad);
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 	// world.add(make_shared<quad>(point3(0, 0, ), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	hittable_list lights;
+	lights.add(light_quad);
 
 	shared_ptr<hittable> glass_sphere
 		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<dielectric>(1.5));
@@ -471,7 +561,7 @@ void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	cam.render(world, lights);
 }
 
 void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth) {
@@ -487,10 +577,14 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
-	world.add(make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light));
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
+	world.add(light_quad);
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	hittable_list lights;
+	lights.add(light_quad);
 
 	const double radius = 75;
 	std::vector<point3> placed;
@@ -549,8 +643,11 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 				shared_ptr<hittable> s = make_shared<sphere>(center, radius, sphere_material);
 				if (volume)
 					world.add(make_shared<constant_medium>(s, volume_density, volume_albedo));
-				else
+				else {
 					world.add(s);
+					if (choose_mat >= 0.4 && choose_mat < 0.5) // emissive
+						lights.add(s);
+				}
 			}
 		}
 	}
@@ -594,7 +691,7 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	cam.render(world, lights);
 }
 
 void cube_room(int image_width, int samples_per_pixel, int max_depth) {
@@ -621,7 +718,11 @@ void cube_room(int image_width, int samples_per_pixel, int max_depth) {
 	world.add(make_shared<bvh_node>(boxes1));
 
 	auto light = make_shared<diffuse_light>(color(7, 7, 7));
-	world.add(make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), light));
+	auto light_quad = make_shared<quad>(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), light);
+	world.add(light_quad);
+
+	hittable_list lights;
+	lights.add(light_quad);
 
 	// auto center1 = point3(400, 400, 200);
 	// auto center2 = center1 + vec3(30, 0, 0);
@@ -668,5 +769,5 @@ void cube_room(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world);
+	cam.render(world, lights);
 }

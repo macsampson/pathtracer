@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "core/color.h"
+#include "core/interval.h"
 #include "core/rtweekend.h"
 #include "core/vec3.h"
 #include "external/stb_image_write.h"
@@ -34,7 +35,8 @@ class camera {
 	double focus_dist = 10;	  // Distance from camera lookfrom to plane of perfect focus
 
 	// Renders the scene to stdout as a PPM image by shooting samples_per_pixel rays per pixel.
-	void render(const hittable& world, const std::string& filename = "output.png") {
+	void render(const hittable& world, const hittable& lights,
+				const std::string& filename = "output.png") {
 		initialize();
 		std::time_t t = std::time(nullptr);
 		char timestamp[16];
@@ -65,7 +67,7 @@ class camera {
 						color pixel_color(0, 0, 0);
 						for (int sample = 0; sample < samples_per_pixel; sample++) {
 							ray pixel_ray = get_ray(i, j);
-							pixel_color += ray_color(pixel_ray, max_depth, world);
+							pixel_color += ray_color(pixel_ray, max_depth, world, lights, false);
 						}
 						framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
 					}
@@ -188,29 +190,66 @@ class camera {
 	// Recursively traces ray r through the world up to max bounces (depth).
 	// Returns the accumulated color contribution. Returns black when depth is exhausted.
 	// Falls back to a sky gradient when no object is hit.
-	color ray_color(const ray& r, int depth, const hittable& world) const {
-		if (depth <= 0) {
+	color ray_color(const ray& r, int depth, const hittable& world, const hittable& lights,
+					bool skip_emission) const {
+		if (depth <= 0)
 			return color(0, 0, 0);
-		}
-		hit_record rec;
 
+		hit_record rec;
 		if (!world.hit(r, interval(0.001, infinity), rec))
 			return background;
 
+		color emitted = skip_emission ? color(0, 0, 0) : rec.mat->emitted(rec.u, rec.v, rec.point);
+
+		// If material doesn't scatter (pure emitter), return emission only.
+		// But: on a direct camera ray or specular bounce, we DO want to see the light.
+		// On a diffuse bounce where we already sampled the light explicitly, we'd
+		// double-count. For now, always return emission here — we handle the
+		// double-counting below.
+
 		ray scattered;
 		color attenuation;
-		color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.point);
-
 		if (!rec.mat->scatter(r, rec, attenuation, scattered))
-			return color_from_emission;
+			return emitted;
 
-		color color_from_scatter = attenuation * ray_color(scattered, depth - 1, world);
+		// === DIRECT LIGHT SAMPLING (new) ===
+		// Sample a random point on a light source
+		vec3 light_dir = lights.random_point(rec.point) - rec.point;
+		// cap min distance
+		double distance_sq = light_dir.length_squared();
+		distance_sq = std::fmax(distance_sq, 0.01);
+		double light_dist = std::sqrt(distance_sq);
+		light_dir = unit_vector(light_dir);
 
-		return color_from_emission + color_from_scatter;
+		// Check if the light sample is above the surface
+		double cos_at_surface = dot(rec.normal, light_dir);
+		color direct(0, 0, 0);
+		bool is_diffuse = rec.mat->is_diffuse();
 
-		// vec3 unit_direction = unit_vector(r.direction());
-		// auto a = 0.5 * (unit_direction.y() + 1.0);
-		// return (1.0 - a) * color(1.0, 1.0, 1.0) + (a * color(0.5, 0.7, 1.0));
+		if (cos_at_surface > 0 && is_diffuse) {
+
+			// Shadow ray — does anything block the path to the light?
+			hit_record blocker_rec;
+			ray shadow_ray = ray(rec.point, light_dir, r.time());
+			bool blocked = world.hit(shadow_ray, interval(0.001, light_dist - 0.001), blocker_rec);
+			if (!blocked) {
+				// Light PDF: distance² / (cos_at_light * light_area)
+				double light_pdf = lights.pdf_value(rec.point, light_dir);
+				if (light_pdf > 0) {
+					hit_record light_rec;
+					lights.hit(ray(rec.point, light_dir, r.time()), interval(0.001, infinity), light_rec);
+					color light_emission
+						= light_rec.mat->emitted(light_rec.u, light_rec.v, light_rec.point);
+					double weight = std::fmin(cos_at_surface / (pi * light_pdf), 1.0);
+					direct = attenuation * light_emission * weight;
+				}
+			}
+		}
+
+		// === INDIRECT (existing, unchanged) ===
+		color indirect = attenuation * ray_color(scattered, depth - 1, world, lights, is_diffuse);
+
+		return emitted + direct + indirect;
 	}
 };
 
