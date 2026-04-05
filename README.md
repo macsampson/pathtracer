@@ -28,7 +28,7 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
   <tr>
     <td align="center">
       <img src="gallery/portfolio3.png" width="600"/><br/>
-      <sub><b>Randomized Sphere Cornell Box</b> - 10000 SPP, 600x600</sub>
+      <sub><b>Randomized Sphere Cornell Box</b> - 2000 SPP, 600x600</sub>
     </td>
   </tr>
   <tr>
@@ -50,7 +50,7 @@ Benchmarks on the Cornell Box scene (400×400, 1000 SPP). Multithreading uses In
 | Single-threaded | 4m 46s |
 | Multi-threaded (TBB) | 1m 16s |
 
-**~3.75× speedup** from multithreading.
+**~4× speedup** from multithreading.
 
 ---
 
@@ -64,7 +64,7 @@ This results in far fewer samples per pixel being required to converge on the tr
   <tr>
     <td align="center">
       <img src="gallery/naive_1000spp.png" width="500"/><br/>
-      <sub><b>Naive</b> - 1000 SPP, 500x500</sub>
+      <sub><b>Naive Sampling</b> - 1000 SPP, 500x500</sub>
     </td>
     <td align="center">
       <img src="gallery/importance_sampling_1000spp.png" width="500"/><br/>
