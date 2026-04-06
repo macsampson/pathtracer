@@ -73,7 +73,7 @@ This results in far fewer samples per pixel being required to converge on the tr
   </tr>
 </table>
 
-###Volumes Update
+### Volumes Update
 
 Volumes were initially excluded from next event estimation. Extending the framework to handle the isotropic phase function (`1/(4π)`, uniform over the sphere) alongside the existing Lambertian term (`cos(θ)/π`) produced a significant noise reduction at equal sample counts.
 
