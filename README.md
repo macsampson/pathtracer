@@ -54,11 +54,11 @@ Benchmarks on the Cornell Box scene (400×400, 1000 SPP). Multithreading uses In
 
 ---
 
-### Direct Light Sampling
+### Direct Light Sampling (Next Event Estimation)
 
 For every ray hit on a diffuse surface, a light source is directly sampled. This means for each ray hit, we check the path from that point to a randomly chosen light source and determine if that path is occluded. If it isn't, we compute the direct illumination contribution for that point. 
 
-This results in far fewer samples per pixel being required to converge on the true illumination of a scene. Instead of a 1 in n chance of a scattered ray hitting a small light source, it is now guaranteed for diffuse materials. A comparison of each method at 200 samples per pixel can be seen below.
+This results in far fewer samples per pixel being required to converge on the true illumination of a scene. Instead of relying on scattered rays to randomly hit a small light source, every diffuse bounce now explicitly evaluates direct illumination. A comparison of each method at 200 samples per pixel can be seen below.
 
 <table>
   <tr>
@@ -68,6 +68,23 @@ This results in far fewer samples per pixel being required to converge on the tr
     </td>
     <td align="center">
       <img src="gallery/importance_sampling_200spp.png" width="500"/><br/>
+      <sub><b>Direct Light Sampling</b> - 200 SPP, 500x500</sub>
+    </td>
+  </tr>
+</table>
+
+###Volumes Update
+
+Volumes were initially excluded from next event estimation. Extending the framework to handle the isotropic phase function (`1/(4π)`, uniform over the sphere) alongside the existing Lambertian term (`cos(θ)/π`) produced a significant noise reduction at equal sample counts.
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="gallery/naive_volume_200spp.png" width="500"/><br/>
+      <sub><b>Naive Sampling</b> - 200 SPP, 500x500</sub>
+    </td>
+    <td align="center">
+      <img src="gallery/direct_volume_200spp.png" width="500"/><br/>
       <sub><b>Direct Light Sampling</b> - 200 SPP, 500x500</sub>
     </td>
   </tr>
@@ -107,6 +124,7 @@ cmake --build build
 All renders are placed in the `renders/` folder with timestamps and samples per pixel appended to filenames.
 
 ---
+
 
 ## References
 

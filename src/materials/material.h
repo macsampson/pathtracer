@@ -28,6 +28,15 @@ class material {
 	virtual bool is_diffuse() const {
 		return false;
 	}
+
+	virtual bool is_isotropic() const {
+		return false;
+	}
+
+	// TODO: do i need?
+	virtual double scattering_pdf(const ray& r_in, const hit_record& rec, const vec3& dir) const {
+		return 0; // default: no scattering
+	}
 };
 
 class lambertian : public material {
@@ -56,6 +65,11 @@ class lambertian : public material {
 	bool is_diffuse() const override {
 		return true;
 	}
+
+	// double scattering_pdf(const ray& r_in, const hit_record& rec, const vec3& dir) const override {
+	// 	double cos_theta = dot(rec.normal, unit_vector(dir));
+	// 	return cos_theta > 0 ? cos_theta / pi : 0;
+	// }
 };
 
 class metal : public material {
@@ -142,6 +156,14 @@ class isotropic : public material {
 		attenuation = tex->value(rec.u, rec.v, rec.point);
 		return true;
 	}
+
+	bool is_isotropic() const override {
+		return true;
+	}
+
+	// double scattering_pdf(const ray& r_in, const hit_record& rec, const vec3& dir) const override {
+	// 	return 1.0 / (4.0 * pi);
+	// }
 
   private:
 	shared_ptr<texture> tex;

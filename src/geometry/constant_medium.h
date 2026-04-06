@@ -2,10 +2,10 @@
 #define CONSTANT_MEDIUM_H
 
 #include "core/color.h"
-#include "geometry/hittable.h"
 #include "core/interval.h"
-#include "materials/material.h"
 #include "core/rtweekend.h"
+#include "geometry/hittable.h"
+#include "materials/material.h"
 #include "materials/texture.h"
 #include <memory>
 

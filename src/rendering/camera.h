@@ -212,7 +212,7 @@ class camera {
 		if (!rec.mat->scatter(r, rec, attenuation, scattered))
 			return emitted;
 
-		// === DIRECT LIGHT SAMPLING (new) ===
+		// === DIRECT LIGHT SAMPLING ===
 		// Sample a random point on a light source
 		vec3 light_dir = lights.random_point(rec.point) - rec.point;
 		// cap min distance
@@ -225,10 +225,12 @@ class camera {
 		double cos_at_surface = dot(rec.normal, light_dir);
 		color direct(0, 0, 0);
 		bool is_diffuse = rec.mat->is_diffuse();
+		bool is_isotropic = rec.mat->is_isotropic();
 
-		if (cos_at_surface > 0 && is_diffuse) {
+		if ((cos_at_surface > 0 && is_diffuse) || is_isotropic) {
 
-			// Shadow ray — does anything block the path to the light?
+			// Shadow ray
+			// does anything block the path to the light?
 			hit_record blocker_rec;
 			ray shadow_ray = ray(rec.point, light_dir, r.time());
 			bool blocked = world.hit(shadow_ray, interval(0.001, light_dist - 0.001), blocker_rec);
@@ -240,14 +242,16 @@ class camera {
 					lights.hit(ray(rec.point, light_dir, r.time()), interval(0.001, infinity), light_rec);
 					color light_emission
 						= light_rec.mat->emitted(light_rec.u, light_rec.v, light_rec.point);
-					double weight = std::fmin(cos_at_surface / (pi * light_pdf), 1.0);
+					double weight = is_isotropic
+						? std::fmin(1.0 / (4.0 * pi * light_pdf), 1.0)
+						: std::fmin(cos_at_surface / (pi * light_pdf), 1.0);
 					direct = attenuation * light_emission * weight;
 				}
 			}
 		}
 
 		// === INDIRECT (existing, unchanged) ===
-		color indirect = attenuation * ray_color(scattered, depth - 1, world, lights, is_diffuse);
+		color indirect = attenuation * ray_color(scattered, depth - 1, world, lights, is_diffuse || is_isotropic);
 
 		return emitted + direct + indirect;
 	}

@@ -310,6 +310,7 @@ void glass_cube(int image_width, int samples_per_pixel, int max_depth) {
 	auto metal_mat = make_shared<metal>(color(0.8, 0.8, 0.9), 0.0);
 	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0.5);
 	auto green_metal = make_shared<metal>(color(.12, .45, .15), 0.5);
+	auto blue_metal = make_shared<metal>(color(.12, .25, .75), 0.0);
 
 	double cube_size = 230;
 	double inner_cube_size = 0.9 * cube_size;
@@ -320,13 +321,13 @@ void glass_cube(int image_width, int samples_per_pixel, int max_depth) {
 	vec3 translate_pos(135, 165, 165);
 
 	// Cornell box walls
-	// world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_metal));
-	// world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_metal));
+	// world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), white));
+	// world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), blue_metal));
 	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
 	world.add(light_quad);
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
-	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(1000, 0, 0), vec3(0, 555, 0), white));
 
 	hittable_list lights;
 	lights.add(light_quad);
