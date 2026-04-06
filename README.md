@@ -63,12 +63,12 @@ This results in far fewer samples per pixel being required to converge on the tr
 <table>
   <tr>
     <td align="center">
-      <img src="gallery/naive_1000spp.png" width="500"/><br/>
-      <sub><b>Naive Sampling</b> - 1000 SPP, 500x500</sub>
+      <img src="gallery/naive_200spp.png" width="500"/><br/>
+      <sub><b>Naive Sampling</b> - 200 SPP, 500x500</sub>
     </td>
     <td align="center">
-      <img src="gallery/importance_sampling_1000spp.png" width="500"/><br/>
-      <sub><b>Direct Light Sampling</b> - 1000 SPP, 500x500</sub>
+      <img src="gallery/importance_sampling_200spp.png" width="500"/><br/>
+      <sub><b>Direct Light Sampling</b> - 200 SPP, 500x500</sub>
     </td>
   </tr>
 </table>
