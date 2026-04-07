@@ -30,16 +30,16 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
       <img src="gallery/portfolio1.png" width="600"/><br/>
       <sub><b>Randomized Sphere Cornell Box</b> - 2000 SPP, 600x600</sub>
     </td>
-    <td align="center">
-      <img src="gallery/portfolio2.png" width="600"/><br/>
-      <sub><b>Earth, Moon & Mars</b> - Spherical UV mapping with texture data. 100 SPP, 1600x900</sub>
-    </td>
-  </tr>
-  <tr>
       <td align="center">
         <img src="gallery/portfolio3.png" width="600"/><br/>
         <sub><b>Ball-filled Glass Cube</b> - 2000 SPP, 600x600</sub>
       </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="gallery/portfolio2.png" width="600"/><br/>
+      <sub><b>Earth, Moon & Mars</b> - Spherical UV mapping with texture data. 100 SPP, 1600x900</sub>
+    </td>
   </tr>
 </table>
 
@@ -64,7 +64,7 @@ Benchmarks on the Ball-filled Glass Cube scene (500×500, 100 SPP, max depth 50)
 | Single-threaded, with BVH | 44.6s | 4.67× |
 | Multi-threaded (TBB), with BVH | 7.6s | **27.4×** |
 
-The BVH alone gives a **4.67× speedup** on a single thread by reducing ray-primitive intersection tests from `O(N)` to `O(log N)`. Adding TBB-based tile parallelism on top yields an additional **5.86×**, for a combined **27.4× speedup** over the unoptimized baseline.
+The BVH gives a **4.67× speedup** on a single thread by reducing ray-primitive intersection tests from `O(N)` to `O(log N)`. Adding tile-based parallelism on top yields an additional **5.86×**, for a combined **27.4× speedup** over the unoptimized baseline.
 
 BVH speedups were most significant on scenes with many objects. Scenes with fewer objects actually saw slowdowns due to BVH-creation overhead.
 
@@ -128,7 +128,9 @@ cmake --build build
 | `-w`, `--width` | Image width in pixels | `100` |
 | `--spp` | Samples per pixel | `100` |
 | `-d`, `--depth` | Max ray bounce depth | `30` |
+| `--single-thread` | Disable TBB parallelism (useful for benchmarking and debugging) | multi-threaded |
 | `--list` | List available scenes | — |
+
 
 **Available scenes:** `space`, `scene2`, `cube_room`, `perlin_spheres`, `quads`, `light_testing`, `cornell_box`, `cornell_random`, `cornell_variety`
 
