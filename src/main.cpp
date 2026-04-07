@@ -20,20 +20,20 @@
 
 using std::make_shared;
 
-void space(int image_width, int samples_per_pixel, int max_depth);
-void scene2(int image_width, int samples_per_pixel, int max_depth);
-void cube_room(int image_width, int samples_per_pixel, int max_depth);
-void perlin_spheres(int image_width, int samples_per_pixel, int max_depth);
-void glass_cube(int image_width, int samples_per_pixel, int max_depth);
-void light_testing(int image_width, int samples_per_pixel, int max_depth);
-void cornell_box(int image_width, int samples_per_pixel, int max_depth);
-void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth);
-void cornell_variety(int image_width, int samples_per_pixel, int max_depth);
+void space(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void scene2(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void cube_room(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void perlin_spheres(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void glass_cube(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void light_testing(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void cornell_box(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void cornell_variety(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 // TODO: make a scene with a glass cube full of metal spheres.
 
 struct Scene {
 	const char* name;
-	void (*fn)(int, int, int);
+	void (*fn)(int, int, int, bool);
 };
 
 int main(int argc, char* argv[]) {
@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
 	int image_width = 100;
 	int samples_per_pixel = 100;
 	int max_depth = 30;
+	bool single_thread = false;
 
 	for (int i = 1; i < argc; i++) {
 		std::string arg = argv[i];
@@ -65,19 +66,22 @@ int main(int argc, char* argv[]) {
 			samples_per_pixel = std::stoi(argv[++i]);
 		else if ((arg == "-d" || arg == "--depth") && i + 1 < argc)
 			max_depth = std::stoi(argv[++i]);
+		else if (arg == "--single-thread")
+			single_thread = true;
 		else if (arg == "--list") {
 			for (const auto& s : scenes)
 				std::cout << "  " << s.name << "\n";
 			return 0;
 		} else {
-			std::cerr << "Usage: raytracing [-s scene] [-w width] [--spp N] [-d depth] [--list]\n";
+			std::cerr << "Usage: raytracing [-s scene] [-w width] [--spp N] [-d depth] [--single-thread] "
+						 "[--list]\n";
 			return 1;
 		}
 	}
 
 	for (const auto& s : scenes) {
 		if (scene_name == s.name) {
-			s.fn(image_width, samples_per_pixel, max_depth);
+			s.fn(image_width, samples_per_pixel, max_depth, single_thread);
 			return 0;
 		}
 	}
@@ -85,7 +89,7 @@ int main(int argc, char* argv[]) {
 	return 1;
 }
 
-void scene1(int image_width, int samples_per_pixel, int max_depth) {
+void scene1(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	// World - essentially a list of objects
 	hittable_list world;
 
@@ -162,10 +166,11 @@ void scene1(int image_width, int samples_per_pixel, int max_depth) {
 	cam.focus_dist = 10.0;
 
 	hittable_list lights;
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
-void scene2(int image_width, int samples_per_pixel, int max_depth) {
+void scene2(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto checker = make_shared<checker_texture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
@@ -192,6 +197,7 @@ void scene2(int image_width, int samples_per_pixel, int max_depth) {
 	// cam.focus_dist = 10.0;
 
 	hittable_list lights;
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
@@ -219,7 +225,7 @@ void moon(int image_width, int samples_per_pixel, int max_depth) {
 	cam.render(hittable_list(globe), lights);
 }
 
-void space(int image_width, int samples_per_pixel, int max_depth) {
+void space(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list space;
 
 	auto moon_texure = make_shared<image_texture>("assets/moon_texture.jpg");
@@ -270,10 +276,11 @@ void space(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
+	cam.single_thread = single_thread;
 	cam.render(space, lights);
 }
 
-void perlin_spheres(int image_width, int samples_per_pixel, int max_depth) {
+void perlin_spheres(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto pertext = make_shared<noise_texture>(4);
@@ -297,10 +304,11 @@ void perlin_spheres(int image_width, int samples_per_pixel, int max_depth) {
 	cam.defocus_angle = 0;
 
 	hittable_list lights;
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
-void glass_cube(int image_width, int samples_per_pixel, int max_depth) {
+void glass_cube(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -402,10 +410,11 @@ void glass_cube(int image_width, int samples_per_pixel, int max_depth) {
 	cam.lookat = point3(500, 278, 0);
 	cam.vup = vec3(0, 1, 0);
 
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
-void light_testing(int image_width, int samples_per_pixel, int max_depth) {
+void light_testing(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto pertext = make_shared<noise_texture>(4);
@@ -439,10 +448,11 @@ void light_testing(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
-void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
+void cornell_box(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -488,10 +498,11 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
-void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
+void cornell_variety(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -572,10 +583,11 @@ void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
-void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth) {
+void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -663,30 +675,6 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 		}
 	}
 
-	// shared_ptr<hittable> glass_sphere
-	// 	= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<dielectric>(1.5));
-	// // box1 = make_shared<rotate_y>(box1, -18);
-	// glass_sphere = make_shared<translate>(glass_sphere, vec3(450, 225, 30));
-	// world.add(glass_sphere);
-
-	// shared_ptr<hittable> lambertian_sphere
-	// 	= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<lambertian>(color(0.7, 0.95, 1.0)));
-	// // box1 = make_shared<rotate_y>(box1, -18);
-	// lambertian_sphere = make_shared<translate>(lambertian_sphere, vec3(400, 225, 130));
-	// world.add(lambertian_sphere);
-
-	// shared_ptr<hittable> metal_sphere
-	// 	= make_shared<sphere>(point3(0, 0, 0), 75, make_shared<metal>(color(0.5, 0.5, 0.5), 0));
-	// // box1 = make_shared<rotate_y>(box1, -18);
-	// metal_sphere = make_shared<translate>(metal_sphere, vec3(350, 225, 205));
-	// world.add(metal_sphere);
-
-	// shared_ptr<hittable> large_glass_sphere
-	// 	= make_shared<sphere>(point3(0, 0, 0), 150, make_shared<dielectric>(1.5));
-	// // box1 = make_shared<rotate_y>(box1, -18);
-	// large_glass_sphere = make_shared<translate>(large_glass_sphere, vec3(250, 150, 300));
-	// world.add(large_glass_sphere);
-	//
 	world = hittable_list(make_shared<bvh_node>(world));
 
 	camera cam;
@@ -704,10 +692,11 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 
 	cam.defocus_angle = 0;
 
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
 
-void cube_room(int image_width, int samples_per_pixel, int max_depth) {
+void cube_room(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list boxes1;
 
 	int boxes_per_side = 20;
@@ -783,5 +772,6 @@ void cube_room(int image_width, int samples_per_pixel, int max_depth) {
 
 	cam.defocus_angle = 0;
 
+	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }

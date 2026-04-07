@@ -25,6 +25,7 @@ class camera {
 	int samples_per_pixel = 10; // Count of random samples for each pixel
 	int max_depth = 10;			// Maximum number of ray bounces into scene
 	color background;
+	bool single_thread = false;
 
 	double vfov = 90;				   // Vertical view angle (field of view)
 	point3 lookfrom = point3(0, 0, 0); // Point camera is looking from
@@ -59,23 +60,38 @@ class camera {
 
 		// std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-		tbb::parallel_for(
-			tbb::blocked_range2d<int>(0, image_height, 32, 0, image_width, 32),
-			[&](const tbb::blocked_range2d<int>& r) {
-				for (int j = r.rows().begin(); j < r.rows().end(); j++)
-					for (int i = r.cols().begin(); i < r.cols().end(); i++) {
-						color pixel_color(0, 0, 0);
-						for (int sample = 0; sample < samples_per_pixel; sample++) {
-							ray pixel_ray = get_ray(i, j);
-							pixel_color += ray_color(pixel_ray, max_depth, world, lights, false);
-						}
-						framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
+		if (single_thread) {
+			for (int j = 0; j < image_height; j++)
+				for (int i = 0; i < image_width; i++) {
+					color pixel_color(0, 0, 0);
+					for (int sample = 0; sample < samples_per_pixel; sample++) {
+						ray pixel_ray = get_ray(i, j);
+						pixel_color += ray_color(pixel_ray, max_depth, world, lights, false);
 					}
-				int tile_pixels
-					= (r.rows().end() - r.rows().begin()) * (r.cols().end() - r.cols().begin());
-				int done = (pixels_done += tile_pixels);
-				std::clog << "\rRendering: " << (100 * done / total_pixels) << "%" << std::flush;
-			});
+					framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
+					int done = ++pixels_done;
+					if (done % (total_pixels / 100 + 1) == 0)
+						std::clog << "\rRendering: " << (100 * done / total_pixels) << "%" << std::flush;
+				}
+		} else {
+			tbb::parallel_for(
+				tbb::blocked_range2d<int>(0, image_height, 32, 0, image_width, 32),
+				[&](const tbb::blocked_range2d<int>& r) {
+					for (int j = r.rows().begin(); j < r.rows().end(); j++)
+						for (int i = r.cols().begin(); i < r.cols().end(); i++) {
+							color pixel_color(0, 0, 0);
+							for (int sample = 0; sample < samples_per_pixel; sample++) {
+								ray pixel_ray = get_ray(i, j);
+								pixel_color += ray_color(pixel_ray, max_depth, world, lights, false);
+							}
+							framebuffer[j * image_width + i] = pixel_color * pixel_samples_scale;
+						}
+					int tile_pixels
+						= (r.rows().end() - r.rows().begin()) * (r.cols().end() - r.cols().begin());
+					int done = (pixels_done += tile_pixels);
+					std::clog << "\rRendering: " << (100 * done / total_pixels) << "%" << std::flush;
+				});
+		}
 		// std::for_each(std::execution::par, scanlines.begin(), scanlines.end(), [&](int j) {
 		// 	for (int i = 0; i < image_width; i++) {
 		// 		color pixel_color(0, 0, 0);
@@ -242,16 +258,16 @@ class camera {
 					lights.hit(ray(rec.point, light_dir, r.time()), interval(0.001, infinity), light_rec);
 					color light_emission
 						= light_rec.mat->emitted(light_rec.u, light_rec.v, light_rec.point);
-					double weight = is_isotropic
-						? std::fmin(1.0 / (4.0 * pi * light_pdf), 1.0)
-						: std::fmin(cos_at_surface / (pi * light_pdf), 1.0);
+					double weight = is_isotropic ? std::fmin(1.0 / (4.0 * pi * light_pdf), 1.0)
+												 : std::fmin(cos_at_surface / (pi * light_pdf), 1.0);
 					direct = attenuation * light_emission * weight;
 				}
 			}
 		}
 
 		// === INDIRECT (existing, unchanged) ===
-		color indirect = attenuation * ray_color(scattered, depth - 1, world, lights, is_diffuse || is_isotropic);
+		color indirect
+			= attenuation * ray_color(scattered, depth - 1, world, lights, is_diffuse || is_isotropic);
 
 		return emitted + direct + indirect;
 	}
