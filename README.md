@@ -48,7 +48,7 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
 ## Performance
 
 <table>
-  <tr>
+  <tr align="center">
     <td align="center">
       <img src="gallery/performance.png" width="300"/><br/>
       <sub><b>Ball-filled Glass Cube</b> - 100 SPP, 500x500</sub>
@@ -74,17 +74,17 @@ BVH speedups were most significant on scenes with many objects. Scenes with fewe
 
 For every ray hit on a diffuse surface, a light source is directly sampled. This means for each ray hit, we check the path from that point to a randomly chosen light source and determine if that path is occluded. If it isn't, we compute the direct illumination contribution for that point. 
 
-This results in far fewer samples per pixel being required to converge on the true illumination of a scene. Instead of relying on scattered rays to randomly hit a small light source, every diffuse bounce now explicitly evaluates direct illumination. A comparison of each method at 200 samples per pixel can be seen below.
+This results in far fewer samples per pixel being required to converge on the true illumination of a scene. Instead of relying on scattered rays to randomly hit a small light source, every diffuse bounce now explicitly evaluates direct illumination. A comparison of each method at 100 samples per pixel can be seen below.
 
 <table>
   <tr>
     <td align="center">
-      <img src="gallery/naive_200spp.png" width="500"/><br/>
-      <sub><b>Naive Sampling</b> - 200 SPP, 500x500</sub>
+      <img src="gallery/naive_100spp.png" width="400"/><br/>
+      <sub><b>Naive Sampling</b> - 100 SPP, 400x400</sub>
     </td>
     <td align="center">
-      <img src="gallery/importance_sampling_200spp.png" width="500"/><br/>
-      <sub><b>Direct Light Sampling</b> - 200 SPP, 500x500</sub>
+      <img src="gallery/importance_sampling_100spp.png" width="400"/><br/>
+      <sub><b>Direct Light Sampling</b> - 100 SPP, 400x400</sub>
     </td>
   </tr>
 </table>
