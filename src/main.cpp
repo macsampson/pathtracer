@@ -173,6 +173,8 @@ void scene2(int image_width, int samples_per_pixel, int max_depth) {
 	world.add(make_shared<sphere>(point3(0, -10, 0), 10, make_shared<lambertian>(checker)));
 	world.add(make_shared<sphere>(point3(0, 10, 0), 10, make_shared<lambertian>(checker)));
 
+	world = hittable_list(make_shared<bvh_node>(world));
+
 	camera cam;
 
 	cam.aspect_ratio = 16.0 / 9.0;
@@ -194,7 +196,7 @@ void scene2(int image_width, int samples_per_pixel, int max_depth) {
 }
 
 void moon(int image_width, int samples_per_pixel, int max_depth) {
-	auto moon_texure = make_shared<image_texture>("assets/moontexture.jpg");
+	auto moon_texure = make_shared<image_texture>("assets/moon_texture.jpg");
 	auto moon_surface = make_shared<lambertian>(moon_texure);
 	auto globe = make_shared<sphere>(point3(0, 0, 0), 2, moon_surface);
 
@@ -385,6 +387,8 @@ void glass_cube(int image_width, int samples_per_pixel, int max_depth) {
 		}
 	}
 
+	world = hittable_list(make_shared<bvh_node>(world));
+
 	camera cam;
 
 	cam.aspect_ratio = 1.0;
@@ -405,7 +409,7 @@ void light_testing(int image_width, int samples_per_pixel, int max_depth) {
 	hittable_list world;
 
 	auto pertext = make_shared<noise_texture>(4);
-	auto moon_texure = make_shared<image_texture>("assets/moontexture.jpg");
+	auto moon_texure = make_shared<image_texture>("assets/moon_texture.jpg");
 
 	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
 	world.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
@@ -417,6 +421,8 @@ void light_testing(int image_width, int samples_per_pixel, int max_depth) {
 
 	hittable_list lights;
 	lights.add(light_quad);
+
+	world = hittable_list(make_shared<bvh_node>(world));
 
 	camera cam;
 
@@ -464,6 +470,8 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth) {
 	box2 = make_shared<rotate_y>(box2, 15);
 	box2 = make_shared<translate>(box2, vec3(295, 0, 295));
 	world.add(box2);
+
+	world = hittable_list(make_shared<bvh_node>(world));
 
 	camera cam;
 
@@ -546,6 +554,8 @@ void cornell_variety(int image_width, int samples_per_pixel, int max_depth) {
 	small_lambertian_box = make_shared<rotate_y>(small_lambertian_box, -20);
 	small_lambertian_box = make_shared<translate>(small_lambertian_box, vec3(350, 200, 250));
 	world.add(make_shared<constant_medium>(small_lambertian_box, 0.3, color(0.7, 0.95, 1.0)));
+
+	world = hittable_list(make_shared<bvh_node>(world));
 
 	camera cam;
 
@@ -676,6 +686,8 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 	// // box1 = make_shared<rotate_y>(box1, -18);
 	// large_glass_sphere = make_shared<translate>(large_glass_sphere, vec3(250, 150, 300));
 	// world.add(large_glass_sphere);
+	//
+	world = hittable_list(make_shared<bvh_node>(world));
 
 	camera cam;
 
@@ -755,6 +767,7 @@ void cube_room(int image_width, int samples_per_pixel, int max_depth) {
 	// world.add(make_shared<translate>(make_shared<rotate_y>(make_shared<bvh_node>(boxes2), 15),
 	// 								 vec3(-100, 270, 395)));
 
+	world = hittable_list(make_shared<bvh_node>(world));
 	camera cam;
 
 	cam.aspect_ratio = 1.0;
