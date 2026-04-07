@@ -3,7 +3,7 @@
 A C++ Monte Carlo path tracer that simulates physically-based light propagation to produce photorealistic renders.
 
 <p align="center">
-  <img src="gallery/portfolio1.png" alt="Cornell Box — 1000 SPP" width="600"/><br/>
+  <img src="gallery/hero.png" alt="Cornell Box — 1000 SPP" width="600"/><br/>
   <sub><b>Cornell Box</b> - 1000 SPP, 600x600</sub>
 </p>
 
@@ -27,15 +27,19 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
 <table>
   <tr>
     <td align="center">
-      <img src="gallery/portfolio3.png" width="600"/><br/>
+      <img src="gallery/portfolio1.png" width="600"/><br/>
       <sub><b>Randomized Sphere Cornell Box</b> - 2000 SPP, 600x600</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center">
       <img src="gallery/portfolio2.png" width="600"/><br/>
       <sub><b>Earth, Moon & Mars</b> - Spherical UV mapping with texture data. 100 SPP, 1600x900</sub>
     </td>
+  </tr>
+  <tr>
+      <td align="center">
+        <img src="gallery/portfolio3.png" width="600"/><br/>
+        <sub><b>Ball-filled Glass Cube</b> - 2000 SPP, 600x600</sub>
+      </td>
   </tr>
 </table>
 
@@ -43,14 +47,26 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
 
 ## Performance
 
-Benchmarks on the Cornell Box scene (400×400, 1000 SPP). Multithreading uses Intel TBB for tile-based parallelism.
+<table>
+  <tr>
+    <td align="center">
+      <img src="gallery/performance.png" width="300"/><br/>
+      <sub><b>Ball-filled Glass Cube</b> - 100 SPP, 500x500</sub>
+    </td>
+  </tr>
+</table>
 
-| Configuration | Render Time |
-|---|---|
-| Single-threaded | 4m 46s |
-| Multi-threaded (TBB) | 1m 16s |
+Benchmarks on the Ball-filled Glass Cube scene (500×500, 100 SPP, max depth 50). Multithreading uses Intel TBB for tile-based parallelism. BVH uses axis-aligned bounding boxes with recursive subdivision.
 
-**~4× speedup** from multithreading.
+| Configuration | Render Time | Speedup |
+|---|---|---|
+| Single-threaded, no BVH | 3m 28s | 1.0× (baseline) |
+| Single-threaded, with BVH | 44.6s | 4.67× |
+| Multi-threaded (TBB), with BVH | 7.6s | **27.4×** |
+
+The BVH alone gives a **4.67× speedup** on a single thread by reducing ray-primitive intersection tests from `O(N)` to `O(log N)`. Adding TBB-based tile parallelism on top yields an additional **5.86×**, for a combined **27.4× speedup** over the unoptimized baseline.
+
+BVH speedups were most significant on scenes with many objects. Scenes with fewer objects actually saw slowdowns due to BVH-creation overhead.
 
 ---
 

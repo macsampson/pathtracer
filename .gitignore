@@ -12,6 +12,7 @@ Makefile
 # Output
 renders
 *.ppm
+*.out
 
 # Binary
 raytracing
