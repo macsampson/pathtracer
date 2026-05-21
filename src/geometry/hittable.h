@@ -74,6 +74,16 @@ class translate : public hittable {
 		return true;
 	}
 
+	// Translate origin into object space, then shift the sampled point back to world space.
+	vec3 random_point(const point3& origin) const override {
+		return object->random_point(origin - offset) + offset;
+	}
+
+	// Direction is unchanged by translation; only the origin needs shifting.
+	double pdf_value(const point3& origin, const vec3& dir) const override {
+		return object->pdf_value(origin - offset, dir);
+	}
+
 	aabb bounding_box() const override {
 		return bbox;
 	}
@@ -148,6 +158,27 @@ class rotate_y : public hittable {
 						  (-sin_theta * rec.normal.x()) + (cos_theta * rec.normal.z()));
 
 		return true;
+	}
+
+	vec3 random_point(const point3& origin) const override {
+		// Rotate origin into object space (inverse rotation), sample, rotate result back.
+		auto obj_origin = point3(
+			cos_theta * origin.x() - sin_theta * origin.z(), origin.y(),
+			sin_theta * origin.x() + cos_theta * origin.z());
+		auto p = object->random_point(obj_origin);
+		return point3(
+			cos_theta * p.x() + sin_theta * p.z(), p.y(),
+			-sin_theta * p.x() + cos_theta * p.z());
+	}
+
+	double pdf_value(const point3& origin, const vec3& dir) const override {
+		auto obj_origin = point3(
+			cos_theta * origin.x() - sin_theta * origin.z(), origin.y(),
+			sin_theta * origin.x() + cos_theta * origin.z());
+		auto obj_dir = vec3(
+			cos_theta * dir.x() - sin_theta * dir.z(), dir.y(),
+			sin_theta * dir.x() + cos_theta * dir.z());
+		return object->pdf_value(obj_origin, obj_dir);
 	}
 
 	aabb bounding_box() const override {

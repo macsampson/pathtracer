@@ -62,8 +62,11 @@ class image_texture : public texture {
 		if (image.height() <= 0)
 			return color(0, 1, 1);
 
-		u = interval(0, 1).clamp(u);
-		v = 1.0 - interval(0, 1).clamp(v);
+		// Wrap UVs with fmod so values outside [0,1] tile correctly.
+		// Clamping would stretch the edge pixel across any UV island that
+		// extends past the boundary, causing smearing and wrong atlas lookups.
+		u = u - std::floor(u);
+		v = 1.0 - (v - std::floor(v));
 
 		auto i = int(u * image.width());
 		auto j = int(v * image.height());

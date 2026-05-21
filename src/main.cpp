@@ -797,17 +797,23 @@ void obj_mesh(int image_width, int samples_per_pixel, int max_depth, bool single
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
+	shared_ptr<hittable> light_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<diffuse_light>(color(15, 15, 15)));
+	light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
+	world.add(light_sphere);
+
 	hittable_list lights;
 	lights.add(light_quad);
+	lights.add(light_sphere);
 
 	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
 	auto glass_mat = make_shared<dielectric>(1.5);
 	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
-	auto obj = load_obj_fit("assets/dragon.obj", red_metal, 500.0);
-	obj = make_shared<rotate_x>(obj, -90);
-	obj = make_shared<rotate_y>(obj, 200);
+	auto obj = load_obj_fit("assets/midna.obj", mesh_mat, 700.0);
+	// obj = make_shared<rotate_x>(obj, -90);
+	obj = make_shared<rotate_y>(obj, 180);
 	// obj = make_shared<rotate_z>(obj, 45);
-	obj = make_shared<translate>(obj, vec3(278, 295, 278));
+	obj = make_shared<translate>(obj, vec3(278, 0, 278));
 	world.add(obj);
 
 	world = hittable_list(make_shared<bvh_node>(world));
