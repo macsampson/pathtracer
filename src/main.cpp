@@ -1,6 +1,7 @@
 #include "core/color.h"
 #include "core/rtweekend.h"
 #include "geometry/constant_medium.h"
+#include "geometry/mesh.h"
 #include "geometry/quad.h"
 #include "materials/material.h"
 
@@ -29,6 +30,7 @@ void light_testing(int image_width, int samples_per_pixel, int max_depth, bool s
 void cornell_box(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void cornell_variety(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void obj_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 // TODO: make a scene with a glass cube full of metal spheres.
 
 struct Scene {
@@ -47,6 +49,7 @@ int main(int argc, char* argv[]) {
 		{"cornell_box", cornell_box},
 		{"cornell_random", cornell_random_spheres},
 		{"cornell_variety", cornell_variety},
+		{"obj_mesh", obj_mesh},
 	};
 
 	// Defaults
@@ -772,6 +775,50 @@ void cube_room(int image_width, int samples_per_pixel, int max_depth, bool singl
 
 	cam.defocus_angle = 0;
 
+	cam.single_thread = single_thread;
+	cam.render(world, lights);
+}
+
+// Renders an OBJ file inside a Cornell box. Place your OBJ at assets/model.obj.
+// load_obj_fit auto-scales to fit; adjust the translate to reposition as needed.
+void obj_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+	hittable_list world;
+
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(15, 15, 15));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	auto light_quad = make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(light_quad);
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	hittable_list lights;
+	lights.add(light_quad);
+
+	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
+	auto obj = load_obj_fit("assets/dragon.obj", mesh_mat, 300.0);
+	obj = make_shared<rotate_y>(obj, 180);
+	obj = make_shared<translate>(obj, vec3(278, 0, 278));
+	world.add(obj);
+
+	world = hittable_list(make_shared<bvh_node>(world));
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = image_width;
+	cam.samples_per_pixel = samples_per_pixel;
+	cam.max_depth = max_depth;
+	cam.background = color(0, 0, 0);
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+	cam.defocus_angle = 0;
 	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }

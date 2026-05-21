@@ -17,7 +17,9 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
 - **Optical Effects**: Depth-of-field (defocus disk sampling), motion blur (time-parameterized intersection), area lighting
 - **Procedural Textures**: Perlin noise with trilinear interpolation, Hermite smoothing, and multi-octave turbulence
 - **Image Textures**: UV-mapped JPG/PNG via stb_image library
-- **Geometry**: Spheres, axis-aligned parallelograms, composite box primitive
+- **Geometry**: Spheres, axis-aligned parallelograms, composite box primitive, triangle meshes
+- **Triangle Meshes**: Barycentric intersection test; per-vertex normal interpolation for smooth shading; UV attribute interpolation
+- **OBJ Loading**: Wavefront OBJ parser supporting all face formats (`v`, `v/vt`, `v//vn`, `v/vt/vn`), negative indices, and n-gon fan triangulation; BVH-accelerated mesh; auto-scale helper
 - **Anti-aliasing**: Multi-sample per-pixel with random jitter
 
 ---
@@ -89,6 +91,8 @@ This results in far fewer samples per pixel being required to converge on the tr
   </tr>
 </table>
 
+---
+
 ### Volumes Update
 
 Volumes were initially excluded from next event estimation. Extending the framework to handle the isotropic phase function (`1/(4π)`, uniform over the sphere) alongside the existing Lambertian term (`cos(θ)/π`) produced a significant noise reduction at equal sample counts.
@@ -102,6 +106,30 @@ Volumes were initially excluded from next event estimation. Extending the framew
     <td align="center">
       <img src="gallery/direct_volume_200spp.png" width="500"/><br/>
       <sub><b>Direct Light Sampling</b> - 200 SPP, 500x500</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
+### Triangle Mesh Rendering
+
+Triangles reuse `quad`'s plane–ray intersection. `quad` finds the `t` value where a ray hits the plane and computes barycentric-like coordinates (α, β) such that the hit point = Q + α·**u** + β·**v**. A quad's interior test is `0 ≤ α ≤ 1` and `0 ≤ β ≤ 1`. `triangle` overrides only that test: `α ≥ 0`, `β ≥ 0`, `α + β ≤ 1`, restricting the hit region to the half of the parallelogram below the hypotenuse. All plane intersection math, normal setup, and AABB construction are inherited unchanged.
+
+**Smooth shading.** OBJ files supply per-vertex normals (`vn`). Instead of using the face's flat geometric normal, the three vertex normals are interpolated at the hit point using the same α, β coordinates:
+
+```
+N_interp = normalize((1 − α − β)·N₀  +  α·N₁  +  β·N₂)
+```
+
+This gives smooth curvature across a mesh without increasing triangle count, the same idea as Phong shading in rasterization, applied here during ray–surface evaluation. UV texture coordinates (`vt`) are interpolated identically.
+
+**OBJ loading pipeline.** The parser handles all four Wavefront face token formats (`v`, `v/vt`, `v//vn`, `v/vt/vn`), relative (negative) indices, and fan-triangulates n-gons. The resulting triangle list is immediately wrapped in a `bvh_node`, so a mesh with hundreds of thousands of faces benefits from O(log n) ray traversal internally, independent of the scene-level BVH. A `load_obj_fit` helper auto-scales the mesh so its longest axis fits a target world-space size, solving the problem that OBJ files have no standard unit.
+
+<table>
+  <tr>
+    <td align="center">
+      <em>Rendered OBJ mesh — coming soon</em>
     </td>
   </tr>
 </table>
@@ -132,7 +160,7 @@ cmake --build build
 | `--list` | List available scenes | — |
 
 
-**Available scenes:** `space`, `scene2`, `cube_room`, `perlin_spheres`, `quads`, `light_testing`, `cornell_box`, `cornell_random`, `cornell_variety`
+**Available scenes:** `space`, `scene2`, `cube_room`, `perlin_spheres`, `light_testing`, `cornell_box`, `cornell_random`, `cornell_variety`, `obj_mesh`
 
 **Example:**
 ```bash
