@@ -801,9 +801,13 @@ void obj_mesh(int image_width, int samples_per_pixel, int max_depth, bool single
 	lights.add(light_quad);
 
 	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
-	auto obj = load_obj_fit("assets/dragon.obj", mesh_mat, 300.0);
-	obj = make_shared<rotate_y>(obj, 180);
-	obj = make_shared<translate>(obj, vec3(278, 0, 278));
+	auto glass_mat = make_shared<dielectric>(1.5);
+	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
+	auto obj = load_obj_fit("assets/dragon.obj", red_metal, 500.0);
+	obj = make_shared<rotate_x>(obj, -90);
+	obj = make_shared<rotate_y>(obj, 200);
+	// obj = make_shared<rotate_z>(obj, 45);
+	obj = make_shared<translate>(obj, vec3(278, 295, 278));
 	world.add(obj);
 
 	world = hittable_list(make_shared<bvh_node>(world));

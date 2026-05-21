@@ -129,7 +129,8 @@ This gives smooth curvature across a mesh without increasing triangle count, the
 <table>
   <tr>
     <td align="center">
-      <em>Rendered OBJ mesh — coming soon</em>
+    <img src="gallery/triangle_obj_example.png" width="500"/><br/>
+      <sub><b>Stanford Dragon/b> - 1000 SPP, 500x500</sub>
     </td>
   </tr>
 </table>
