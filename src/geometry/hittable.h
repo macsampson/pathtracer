@@ -161,4 +161,30 @@ class rotate_y : public hittable {
 	aabb bbox;
 };
 
+class scale : public hittable {
+  public:
+	scale(shared_ptr<hittable> object, double s) : object(object), s(s) {
+		auto b = object->bounding_box();
+		bbox = aabb(interval(b.x.min * s, b.x.max * s), interval(b.y.min * s, b.y.max * s),
+					interval(b.z.min * s, b.z.max * s));
+	}
+
+	bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+		ray scaled_r(r.origin() / s, r.direction() / s, r.time());
+		if (!object->hit(scaled_r, ray_t, rec))
+			return false;
+		rec.point *= s;
+		return true;
+	}
+
+	aabb bounding_box() const override {
+		return bbox;
+	}
+
+  private:
+	shared_ptr<hittable> object;
+	double s;
+	aabb bbox;
+};
+
 #endif
