@@ -1,0 +1,18 @@
+{
+  "name": "raytracing",
+  "image": "registry.fedoraproject.org/fedora-toolbox:42",
+  "onCreateCommand": "sudo dnf install -y gcc-c++ cmake ninja-build tbb-devel && sudo dnf clean all",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools"
+      ],
+      "settings": {
+        "cmake.buildDirectory": "${workspaceFolder}/build",
+        "cmake.generator": "Ninja",
+        "cmake.configureArgs": []
+      }
+    }
+  }
+}
