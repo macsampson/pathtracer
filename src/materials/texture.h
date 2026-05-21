@@ -56,17 +56,21 @@ class checker_texture : public texture {
 
 class image_texture : public texture {
   public:
-	image_texture(const char* filename) : image(filename) {}
+	// mirror_u: use GL_MIRRORED_REPEAT for U — tile [1,2] samples in reverse (1.3→0.7
+	// instead of 0.3). Required for Blender mirror-modifier UV layouts where one half
+	// of a symmetric mesh sits in the [1,2] tile. Leave false for models whose UVs sit
+	// outside [0,1] for other reasons (e.g. 3ds Max negative-V offsets).
+	image_texture(const char* filename, bool mirror_u = false)
+	    : image(filename), mirror_u(mirror_u) {}
 
 	color value(double u, double v, const point3& p) const override {
 		if (image.height() <= 0)
 			return color(0, 1, 1);
 
-		// Wrap UVs with fmod so values outside [0,1] tile correctly.
-		// Clamping would stretch the edge pixel across any UV island that
-		// extends past the boundary, causing smearing and wrong atlas lookups.
-		u = u - std::floor(u);
-		v = 1.0 - (v - std::floor(v));
+		u = wrap(u, mirror_u);
+		// V always uses simple wrap before flipping — negative V offsets (3ds Max)
+		// and tiny overshoots both resolve correctly this way.
+		v = 1.0 - wrap(v, false);
 
 		auto i = int(u * image.width());
 		auto j = int(v * image.height());
@@ -77,7 +81,16 @@ class image_texture : public texture {
 	}
 
   private:
+	// Simple wrap: x=1.3 → 0.3. Mirrored wrap: x=1.3 → 0.7 (reverses direction
+	// in odd tiles). std::abs(n) guards against negative n in C++ where -1%2 == -1.
+	static double wrap(double x, bool mirrored) {
+		int n = (int)std::floor(x);
+		double frac = x - n;
+		return (mirrored && std::abs(n) % 2 == 1) ? 1.0 - frac : frac;
+	}
+
 	rtw_image image;
+	bool mirror_u = false;
 };
 
 class noise_texture : public texture {
