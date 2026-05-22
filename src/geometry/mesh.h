@@ -117,6 +117,7 @@ load_mtl(const std::string& path, const std::filesystem::path& mtl_dir, bool mir
 }
 
 // Loads an OBJ file and returns a BVH-accelerated triangle mesh.
+//
 // If the OBJ references a .mtl file via `mtllib`, per-material textures are
 // loaded automatically from that file. The fallback `mat` is used for faces
 // that have no `usemtl` assignment or whose material isn't in the MTL.
@@ -125,12 +126,35 @@ load_mtl(const std::string& path, const std::filesystem::path& mtl_dir, bool mir
 // means ray traversal into a large mesh does O(log n) work over just the
 // mesh's triangles — the scene BVH never has to hold individual triangles
 // as leaves, keeping both BVHs compact.
-// override_mat: when non-null, all triangles use this material regardless of usemtl
-// directives in the OBJ. MTL loading is skipped entirely. Useful for rendering a
-// mesh as glass, metal, etc. without caring about the original texture assignment.
-inline shared_ptr<hittable> load_obj(const std::string& path, shared_ptr<material> fallback_mat,
-									 bool mirror_u = false, shared_ptr<material> override_mat = nullptr,
-									 bool center = false) {
+//
+// smooth: controls normal shading for the mesh.
+//   true  — use `vn` normals from the OBJ if present; if absent, compute
+//           area-weighted vertex normals from the mesh geometry (two-pass).
+//           Produces smooth curvature across shared edges.
+//   false — always use the flat geometric face normal (one per triangle).
+//           Produces hard faceted edges regardless of whether `vn` is present.
+//
+// Area-weighted vertex normal computation: for each vertex, accumulate the
+// unnormalized cross products of all triangles that share it, then normalize.
+// The cross product magnitude equals 2 × triangle area, so larger triangles
+// contribute proportionally more — this is better than plain averaging for
+// meshes with non-uniform tessellation and costs nothing extra.
+//
+// Hard creases: if the model was exported with vertices split at crease edges
+// (the standard approach in Blender, Maya, etc.), averaging still produces
+// correct hard edges because the two vertex copies accumulate normals from
+// disjoint triangle sets.
+//
+// override_mat: when non-null, all triangles use this material regardless of
+// usemtl directives in the OBJ. MTL loading is skipped entirely. Useful for
+// rendering a mesh as glass, metal, etc. without caring about the original
+// texture assignment.
+inline shared_ptr<hittable> load_obj(const std::string& path,
+                                     shared_ptr<material> fallback_mat,
+                                     bool mirror_u = false,
+                                     shared_ptr<material> override_mat = nullptr,
+                                     bool smooth = true,
+                                     bool center = false) {
 	std::ifstream file(path);
 	if (!file) {
 		std::cerr << "load_obj: cannot open " << path << "\n";
@@ -145,8 +169,17 @@ inline shared_ptr<hittable> load_obj(const std::string& path, shared_ptr<materia
 	std::vector<point3> verts;
 	std::vector<vec3> normals;
 	std::vector<std::array<double, 2>> texcoords;
-	hittable_list mesh;
 
+	// Buffer all face data for the two-pass normal computation path.
+	// Each FaceVert holds resolved 0-based indices into the attribute arrays
+	// (-1 means the attribute was absent for that vertex).
+	struct FaceVert {
+		int vi, ti, ni;
+	};
+	std::vector<std::vector<FaceVert>> faces;
+	std::vector<shared_ptr<material>> face_mats;
+
+	// --- First pass: read geometry and buffer faces ---
 	std::string line;
 	while (std::getline(file, line)) {
 		if (line.empty() || line[0] == '#')
@@ -177,59 +210,118 @@ inline shared_ptr<hittable> load_obj(const std::string& path, shared_ptr<materia
 			ss >> u >> v;
 			texcoords.push_back({u, v});
 		} else if (token == "f") {
-			std::vector<std::array<int, 3>> face;
+			std::vector<FaceVert> face;
 			std::string tok;
-			while (ss >> tok)
-				face.push_back(parse_face_token(tok, verts.size(), texcoords.size(), normals.size()));
+			while (ss >> tok) {
+				auto idx = parse_face_token(tok, verts.size(), texcoords.size(), normals.size());
+				face.push_back({idx[0], idx[1], idx[2]});
+			}
+			faces.push_back(std::move(face));
+			face_mats.push_back(current_mat);
+		}
+	}
 
-			// Fan triangulation: anchor at face[0] and walk the remaining vertices.
-			// Face (v0, v1, v2, v3, ...) becomes triangles (v0,v1,v2), (v0,v2,v3), ...
-			// This is correct for convex polygons. Most OBJ exporters either output
-			// triangles directly or produce convex quads, so this covers the common cases.
+	// --- Compute vertex normals if smooth shading requested and OBJ has none ---
+	//
+	// Accumulate area-weighted face normals at each vertex position, then normalize.
+	// The cross product (e1 × e2) is unnormalized — its magnitude is 2 × area —
+	// so each face's contribution is automatically scaled by its area. Larger
+	// triangles steer the normal more than tiny slivers. After accumulation,
+	// normalize each vertex normal to unit length.
+	bool computed_normals = false;
+	if (smooth && normals.empty() && !verts.empty()) {
+		normals.resize(verts.size(), vec3(0, 0, 0));
+		for (auto& face : faces) {
+			// Fan triangulation matches the triangle-building loop below.
 			for (int i = 1; i + 1 < (int)face.size(); i++) {
-				auto& f0 = face[0];
-				auto& f1 = face[i];
-				auto& f2 = face[i + 1];
+				vec3 e1 = verts[face[i].vi] - verts[face[0].vi];
+				vec3 e2 = verts[face[i + 1].vi] - verts[face[0].vi];
+				vec3 fn = cross(e1, e2); // unnormalized, magnitude = 2 * area
+				normals[face[0].vi] += fn;
+				normals[face[i].vi] += fn;
+				normals[face[i + 1].vi] += fn;
+			}
+		}
+		for (auto& n : normals)
+			if (n.length_squared() > 1e-30)
+				n = unit_vector(n);
+		computed_normals = true;
+	}
 
-				const point3& v0 = verts[f0[0]];
-				const point3& v1 = verts[f1[0]];
-				const point3& v2 = verts[f2[0]];
+	// --- Second pass: build triangles ---
+	hittable_list mesh;
+	for (int fi = 0; fi < (int)faces.size(); fi++) {
+		auto& face = faces[fi];
+		auto mat = face_mats[fi];
 
-				// Only use smooth shading if all three vertices have normals.
-				// Mixing flat and interpolated normals within a mesh would cause
-				// visible seams, so we fall back to flat if any normal is missing.
-				bool has_n = f0[2] >= 0 && f1[2] >= 0 && f2[2] >= 0;
-				bool has_uv = f0[1] >= 0 && f1[1] >= 0 && f2[1] >= 0;
+		// Fan triangulation: anchor at face[0] and walk the remaining vertices.
+		// Face (v0, v1, v2, v3, ...) becomes triangles (v0,v1,v2), (v0,v2,v3), ...
+		// This is correct for convex polygons. Most OBJ exporters either output
+		// triangles directly or produce convex quads, so this covers the common cases.
+		for (int i = 1; i + 1 < (int)face.size(); i++) {
+			auto& f0 = face[0];
+			auto& f1 = face[i];
+			auto& f2 = face[i + 1];
 
-				if (has_n && has_uv) {
-					mesh.add(make_shared<triangle>(v0, v1, v2, normals[f0[2]], normals[f1[2]],
-												   normals[f2[2]], texcoords[f0[1]], texcoords[f1[1]],
-												   texcoords[f2[1]], current_mat));
-				} else if (has_n) {
-					// Normals but no UVs — smooth shading, barycentric UV fallback.
-					// Pass zero UVs; the texture will sample a fixed point.
-					mesh.add(make_shared<triangle>(v0, v1, v2, normals[f0[2]], normals[f1[2]],
-												   normals[f2[2]], std::array<double, 2>{0, 0},
-												   std::array<double, 2>{0, 0},
-												   std::array<double, 2>{0, 0}, current_mat));
-				} else if (has_uv) {
-					// UVs but no normals (e.g. old 3ds Max exports) — flat shading,
-					// interpolated UVs. This is the common case for textured OBJs
-					// without explicit vertex normals.
-					mesh.add(make_shared<triangle>(v0, v1, v2, texcoords[f0[1]], texcoords[f1[1]],
-												   texcoords[f2[1]], current_mat));
+			const point3& v0 = verts[f0.vi];
+			const point3& v1 = verts[f1.vi];
+			const point3& v2 = verts[f2.vi];
+
+			bool has_uv = f0.ti >= 0 && f1.ti >= 0 && f2.ti >= 0;
+
+			// Resolve normals:
+			//   computed_normals → indexed by vertex position (vi), always present
+			//   OBJ vn present   → indexed by face normal index (ni), may be absent
+			//   smooth=false     → no normals, flat shading
+			bool has_n = false;
+			vec3 n0, n1, n2;
+			if (smooth) {
+				if (computed_normals) {
+					// Every vertex has a computed normal — always use smooth shading.
+					has_n = true;
+					n0 = normals[f0.vi];
+					n1 = normals[f1.vi];
+					n2 = normals[f2.vi];
 				} else {
-					mesh.add(make_shared<triangle>(v0, v1, v2, current_mat));
+					// OBJ-supplied normals; only use smooth shading if all three
+					// vertices have a normal index (mixing flat and smooth causes seams).
+					has_n = f0.ni >= 0 && f1.ni >= 0 && f2.ni >= 0;
+					if (has_n) {
+						n0 = normals[f0.ni];
+						n1 = normals[f1.ni];
+						n2 = normals[f2.ni];
+					}
 				}
+			}
+
+			if (has_n && has_uv) {
+				mesh.add(make_shared<triangle>(v0, v1, v2, n0, n1, n2,
+				                              texcoords[f0.ti], texcoords[f1.ti],
+				                              texcoords[f2.ti], mat));
+			} else if (has_n) {
+				// Normals but no UVs — smooth shading, zero UV fallback.
+				mesh.add(make_shared<triangle>(v0, v1, v2, n0, n1, n2,
+				                              std::array<double, 2>{0, 0},
+				                              std::array<double, 2>{0, 0},
+				                              std::array<double, 2>{0, 0}, mat));
+			} else if (has_uv) {
+				// UVs but no normals — flat shading with interpolated UVs.
+				mesh.add(make_shared<triangle>(v0, v1, v2,
+				                              texcoords[f0.ti], texcoords[f1.ti],
+				                              texcoords[f2.ti], mat));
+			} else {
+				mesh.add(make_shared<triangle>(v0, v1, v2, mat));
 			}
 		}
 	}
 
-	std::clog << "load_obj: loaded " << mesh.objects.size() << " triangles from " << path << "\n";
+	std::clog << "load_obj: loaded " << mesh.objects.size() << " triangles from " << path
+	          << (computed_normals ? " (computed vertex normals)" : "") << "\n";
 	shared_ptr<hittable> result = make_shared<bvh_node>(mesh);
 	if (center) {
 		auto b = result->bounding_box();
-		vec3 offset(-(b.x.min + b.x.max) * 0.5, -(b.y.min + b.y.max) * 0.5, -(b.z.min + b.z.max) * 0.5);
+		vec3 offset(-(b.x.min + b.x.max) * 0.5, -(b.y.min + b.y.max) * 0.5,
+		            -(b.z.min + b.z.max) * 0.5);
 		result = make_shared<translate>(result, offset);
 	}
 	return result;
@@ -239,11 +331,14 @@ inline shared_ptr<hittable> load_obj(const std::string& path, shared_ptr<materia
 // OBJ files have no standard unit — a model exported from Blender in metres and one
 // exported in millimetres look identical in the file. This helper measures the mesh's
 // bounding box after loading and computes the scale factor automatically.
-inline shared_ptr<hittable> load_obj_fit(const std::string& path, shared_ptr<material> fallback_mat,
-										 double target_size, bool mirror_u = false,
-										 shared_ptr<material> override_mat = nullptr,
-										 bool center = false) {
-	auto mesh = load_obj(path, fallback_mat, mirror_u, override_mat, center);
+inline shared_ptr<hittable> load_obj_fit(const std::string& path,
+                                         shared_ptr<material> fallback_mat,
+                                         double target_size,
+                                         bool mirror_u = false,
+                                         shared_ptr<material> override_mat = nullptr,
+                                         bool smooth = true,
+                                         bool center = false) {
+	auto mesh = load_obj(path, fallback_mat, mirror_u, override_mat, smooth, center);
 	auto b = mesh->bounding_box();
 	double largest = std::max({b.x.size(), b.y.size(), b.z.size()});
 	if (largest < 1e-8)
