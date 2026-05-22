@@ -112,7 +112,7 @@ Volumes were initially excluded from next event estimation. Extending the framew
 
 ---
 
-### Triangle Mesh Rendering
+### Triangle Mesh Rendering + OBJ Support
 
 Triangles reuse `quad`'s plane–ray intersection. `quad` finds the `t` value where a ray hits the plane and computes barycentric-like coordinates (α, β) such that the hit point = Q + α·**u** + β·**v**. A quad's interior test is `0 ≤ α ≤ 1` and `0 ≤ β ≤ 1`. `triangle` overrides only that test: `α ≥ 0`, `β ≥ 0`, `α + β ≤ 1`, restricting the hit region to the half of the parallelogram below the hypotenuse. All plane intersection math, normal setup, and AABB construction are inherited unchanged.
 
@@ -131,6 +131,14 @@ This gives smooth curvature across a mesh without increasing triangle count, the
     <td align="center">
     <img src="gallery/triangle_obj_example.png" width="500"/><br/>
       <sub><b>Stanford Dragon</b> - 1000 SPP, 500x500</sub>
+    </td>
+    <td align="center">
+    <img src="gallery/link_500spp.png" width="500"/><br/>
+      <sub><b>Link & Navi</b> - 500 SPP, 500x500</sub>
+    </td>
+    <td align="center">
+    <img src="gallery/midna_500spp.png" width="500"/><br/>
+      <sub><b>Midna</b> - 500 SPP, 500x500</sub>
     </td>
   </tr>
 </table>
