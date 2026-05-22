@@ -31,6 +31,8 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth, bool sin
 void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void cornell_variety(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void majora_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void midna_tp_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void midna_hw_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void dragon_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
@@ -53,6 +55,8 @@ int main(int argc, char* argv[]) {
 		{"cornell_random", cornell_random_spheres},
 		{"cornell_variety", cornell_variety},
 		{"majora_mesh", majora_mesh},
+		{"midna_tp_mesh", midna_tp_mesh},
+		{"midna_hw_mesh", midna_hw_mesh},
 		{"dragon_mesh", dragon_mesh},
 		{"armadillo_mesh", armadillo_mesh},
 		{"suzanne_mesh", suzanne_mesh},
@@ -839,6 +843,111 @@ void majora_mesh(int image_width, int samples_per_pixel, int max_depth, bool sin
 	cam.render(world, lights);
 }
 
+void midna_tp_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+	hittable_list world;
+
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(15, 15, 15));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	auto light_quad = make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(light_quad);
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<hittable> light_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<diffuse_light>(color(15, 15, 15)));
+	light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
+	world.add(light_sphere);
+
+	hittable_list lights;
+	lights.add(light_quad);
+	lights.add(light_sphere);
+
+	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
+	auto glass_mat = make_shared<dielectric>(1.5);
+	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
+	auto obj = load_obj_fit("assets/midna_tp/midna.obj", mesh_mat, 700.0, true, nullptr, true, false);
+	// obj = make_shared<rotate_x>(obj, -90);
+	obj = make_shared<rotate_y>(obj, 180);
+	// obj = make_shared<rotate_z>(obj, 45);
+	obj = make_shared<translate>(obj, vec3(278, 0, 278));
+	world.add(obj);
+
+	world = hittable_list(make_shared<bvh_node>(world));
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = image_width;
+	cam.samples_per_pixel = samples_per_pixel;
+	cam.max_depth = max_depth;
+	cam.background = color(0, 0, 0);
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+	cam.defocus_angle = 0;
+	cam.single_thread = single_thread;
+	cam.render(world, lights);
+}
+
+void midna_hw_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+	hittable_list world;
+
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(15, 15, 15));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	auto light_quad = make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	world.add(light_quad);
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<hittable> light_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<diffuse_light>(color(15, 15, 15)));
+	light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
+	world.add(light_sphere);
+
+	hittable_list lights;
+	lights.add(light_quad);
+	lights.add(light_sphere);
+
+	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
+	auto glass_mat = make_shared<dielectric>(1.5);
+	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
+	auto obj = load_obj_fit("assets/midna_hw/C_MIDNA_PRINCESS.obj", mesh_mat, 500.0, true, nullptr, true,
+							false);
+	// obj = make_shared<rotate_x>(obj, -90);
+	obj = make_shared<rotate_y>(obj, 180);
+	// obj = make_shared<rotate_z>(obj, 45);
+	obj = make_shared<translate>(obj, vec3(278, 215, 278));
+	world.add(obj);
+
+	world = hittable_list(make_shared<bvh_node>(world));
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = image_width;
+	cam.samples_per_pixel = samples_per_pixel;
+	cam.max_depth = max_depth;
+	cam.background = color(0, 0, 0);
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+	cam.defocus_angle = 0;
+	cam.single_thread = single_thread;
+	cam.render(world, lights);
+}
+
 void dragon_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
@@ -890,6 +999,7 @@ void dragon_mesh(int image_width, int samples_per_pixel, int max_depth, bool sin
 	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
+
 void armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
@@ -941,6 +1051,7 @@ void armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool 
 	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
+
 void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
@@ -957,23 +1068,23 @@ void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool si
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
-	shared_ptr<hittable> light_sphere
-		= make_shared<sphere>(point3(0, 0, 0), 35, make_shared<diffuse_light>(color(15, 15, 15)));
-	light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
-	world.add(light_sphere);
+	// shared_ptr<hittable> light_sphere
+	// = make_shared<sphere>(point3(0, 0, 0), 35, make_shared<diffuse_light>(color(15, 15, 15)));
+	// light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
+	// world.add(light_sphere);
 
 	hittable_list lights;
 	lights.add(light_quad);
-	lights.add(light_sphere);
+	// lights.add(light_sphere);
 
 	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
 	auto glass_mat = make_shared<dielectric>(1.5);
 	auto purple_metal = make_shared<metal>(color(.65, .05, .65), 0);
-	auto obj = load_obj_fit("assets/suzanne.obj", mesh_mat, 500.0, true, glass_mat, true);
-	// obj = make_shared<rotate_x>(obj, -90);
-	obj = make_shared<rotate_y>(obj, 180);
+	auto obj = load_obj_fit("assets/suzanne.obj", mesh_mat, 500.0, true, glass_mat, true, true);
+	obj = make_shared<rotate_x>(obj, -35);
+	obj = make_shared<rotate_y>(obj, 160);
 	// obj = make_shared<rotate_z>(obj, 45);
-	obj = make_shared<translate>(obj, vec3(278, 278, 278));
+	obj = make_shared<translate>(obj, vec3(278, 87, 278));
 	world.add(obj);
 
 	world = hittable_list(make_shared<bvh_node>(world));
