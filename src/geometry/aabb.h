@@ -46,33 +46,17 @@ class aabb {
 	// If the result is non-empty, the ray passes through the box.
 	bool hit(const ray& r, interval ray_t) const {
 		const point3& ray_orig = r.origin();
-		const vec3& ray_dir = r.direction();
 
 		for (int axis = 0; axis < 3; axis++) {
 			const interval& ax = axis_interval(axis);
-			// Precompute reciprocal once per axis (cheaper than two divisions).
-			// Sign is preserved, so negative direction correctly swaps t0/t1 below.
-			const double adinv = 1.0 / ray_dir[axis];
+			const double adinv = r.inv_dir[axis];
 
-			// Solve P(t) = origin + t*direction for t at each slab boundary plane.
 			auto t0 = (ax.min - ray_orig[axis]) * adinv;
 			auto t1 = (ax.max - ray_orig[axis]) * adinv;
 
-			// For a negative direction component, the ray hits ax.max first, so t0 > t1.
-			// In both branches we clamp ray_t to [entry, exit] for this slab.
-			if (t0 < t1) {
-				if (t0 > ray_t.min)
-					ray_t.min = t0;
-				if (t1 < ray_t.max)
-					ray_t.max = t1;
-			} else {
-				if (t1 > ray_t.min)
-					ray_t.min = t1;
-				if (t0 < ray_t.max)
-					ray_t.max = t0;
-			}
+			ray_t.min = std::fmax(ray_t.min, std::fmin(t0, t1));
+			ray_t.max = std::fmin(ray_t.max, std::fmax(t0, t1));
 
-			// If the accumulated interval has collapsed, the ray missed the box.
 			if (ray_t.max <= ray_t.min)
 				return false;
 		}

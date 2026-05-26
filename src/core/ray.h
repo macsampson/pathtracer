@@ -10,12 +10,14 @@ class ray {
 	double tm;
 
   public:
+	vec3 inv_dir;
+
 	// Default constructor; leaves origin and direction uninitialized.
 	ray() {}
 
 	// Constructs a ray from an origin point and a direction vector.
 	ray(const point3& origin, const vec3& direction, double time)
-		: orig(origin), dir(direction), tm(time) {}
+		: orig(origin), dir(direction), inv_dir(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z()), tm(time) {}
 
 	ray(const point3& origin, const vec3& direction) : ray(origin, direction, 0) {}
 
