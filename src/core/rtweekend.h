@@ -2,6 +2,7 @@
 #define RTWEEKEND_H
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -18,11 +19,38 @@ inline double degrees_to_radians(double degrees) {
 	return degrees * pi / 180.0;
 }
 
-// Returns a random double in [0, 1). Updated to use thread-safe rng
+// xoshiro256+ — fast, high-quality RNG for floating-point use.
+// Each thread gets its own state seeded from std::random_device.
+namespace detail {
+inline uint64_t rotl(uint64_t x, int k) {
+	return (x << k) | (x >> (64 - k));
+}
+struct xoshiro256p {
+	uint64_t s[4];
+	xoshiro256p() {
+		std::random_device rd;
+		for (auto& v : s)
+			v = (uint64_t(rd()) << 32) | rd();
+	}
+	uint64_t next() {
+		const uint64_t result = s[0] + s[3];
+		const uint64_t t = s[1] << 17;
+		s[2] ^= s[0];
+		s[3] ^= s[1];
+		s[1] ^= s[2];
+		s[0] ^= s[3];
+		s[2] ^= t;
+		s[3] = rotl(s[3], 45);
+		return result;
+	}
+};
+} // namespace detail
+
+// Returns a random double in [0, 1). Thread-safe via thread_local state.
 inline double random_double() {
-	thread_local std::mt19937 rng{std::random_device{}()};
-	thread_local std::uniform_real_distribution<double> dist(0.0, 1.0);
-	return dist(rng);
+	thread_local detail::xoshiro256p rng;
+	// Extract 53 mantissa bits for a double in [0, 1).
+	return (rng.next() >> 11) * (1.0 / double(UINT64_C(1) << 53));
 }
 
 // Returns a random double in [min, max).
