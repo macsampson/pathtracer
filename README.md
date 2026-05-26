@@ -136,6 +136,8 @@ This gives smooth curvature across a mesh without increasing triangle count, the
     <img src="gallery/link_500spp.png" width="500"/><br/>
       <sub><b>Link & Navi</b> - 500 SPP, 500x500</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center">
     <img src="gallery/midna_500spp.png" width="500"/><br/>
       <sub><b>Midna</b> - 500 SPP, 500x500</sub>
