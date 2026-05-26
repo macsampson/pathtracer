@@ -36,6 +36,9 @@ void midna_hw_mesh(int image_width, int samples_per_pixel, int max_depth, bool s
 void dragon_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void suzanne_armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void adult_link_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void suzanne_glass_spin(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 // TODO: make a scene with a glass cube full of metal spheres.
 
 struct Scene {
@@ -60,6 +63,9 @@ int main(int argc, char* argv[]) {
 		{"dragon_mesh", dragon_mesh},
 		{"armadillo_mesh", armadillo_mesh},
 		{"suzanne_mesh", suzanne_mesh},
+		{"adult_link_mesh", adult_link_mesh},
+		{"suzanne_armadillo_mesh", suzanne_armadillo_mesh},
+		{"suzanne_glass_spin", suzanne_glass_spin},
 	};
 
 	// Defaults
@@ -1058,11 +1064,11 @@ void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool si
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
 	auto white = make_shared<lambertian>(color(.73, .73, .73));
 	auto green = make_shared<lambertian>(color(.12, .45, .15));
-	auto light = make_shared<diffuse_light>(color(15, 15, 15));
+	auto light = make_shared<diffuse_light>(color(7, 7, 7));
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
-	auto light_quad = make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
 	world.add(light_quad);
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
@@ -1080,7 +1086,7 @@ void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool si
 	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
 	auto glass_mat = make_shared<dielectric>(1.5);
 	auto purple_metal = make_shared<metal>(color(.65, .05, .65), 0);
-	auto obj = load_obj_fit("assets/suzanne.obj", mesh_mat, 500.0, true, glass_mat, true, true);
+	auto obj = load_obj_fit("assets/suzanne.obj", mesh_mat, 500.0, true, purple_metal, true, true);
 	obj = make_shared<rotate_x>(obj, -35);
 	obj = make_shared<rotate_y>(obj, 160);
 	// obj = make_shared<rotate_z>(obj, 45);
@@ -1102,4 +1108,193 @@ void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool si
 	cam.defocus_angle = 0;
 	cam.single_thread = single_thread;
 	cam.render(world, lights);
+}
+
+void suzanne_armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+	hittable_list world;
+
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(7, 7, 7));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
+	world.add(light_quad);
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	// shared_ptr<hittable> light_sphere
+	// = make_shared<sphere>(point3(0, 0, 0), 35, make_shared<diffuse_light>(color(15, 15, 15)));
+	// light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
+	// world.add(light_sphere);
+
+	hittable_list lights;
+	lights.add(light_quad);
+	// lights.add(light_sphere);
+
+	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
+	auto glass_mat = make_shared<dielectric>(1.5);
+	auto purple_metal = make_shared<metal>(color(.65, .05, .65), 0);
+	auto suz = load_obj_fit("assets/suzanne.obj", mesh_mat, 300.0, true, purple_metal, true, true);
+	suz = make_shared<rotate_x>(suz, -35);
+	suz = make_shared<rotate_y>(suz, 160);
+	// suz = make_shared<rotate_z>(suz, 45);
+	suz = make_shared<translate>(suz, vec3(180, 87, 120));
+	world.add(suz);
+
+	auto arm = load_obj_fit("assets/armadillo.obj", mesh_mat, 500.0, true, glass_mat);
+	// arm = make_shared<rotate_x>(arm, -90);
+	arm = make_shared<rotate_y>(arm, 45);
+	// arm = make_shared<rotate_z>(arm, 45);
+	arm = make_shared<translate>(arm, vec3(390, 170, 300));
+	world.add(arm);
+
+	world = hittable_list(make_shared<bvh_node>(world));
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = image_width;
+	cam.samples_per_pixel = samples_per_pixel;
+	cam.max_depth = max_depth;
+	cam.background = color(0, 0, 0);
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+	cam.defocus_angle = 0;
+	cam.single_thread = single_thread;
+	cam.render(world, lights);
+}
+
+void adult_link_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+	hittable_list world;
+
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(8, 8, 8));
+
+	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
+	world.add(light_quad);
+	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+	shared_ptr<hittable> light_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 15, make_shared<diffuse_light>(color(15, 15, 15)));
+	light_sphere = make_shared<translate>(light_sphere, vec3(180, 420, 150));
+	world.add(light_sphere);
+
+	shared_ptr<hittable> light_sphere_1
+		= make_shared<sphere>(point3(0, 0, 0), 5, make_shared<diffuse_light>(color(0.02, 1.2, 1.6)));
+	light_sphere_1 = make_shared<translate>(light_sphere_1, vec3(160, 380, 150));
+	world.add(light_sphere_1);
+
+	shared_ptr<hittable> light_sphere_2
+		= make_shared<sphere>(point3(0, 0, 0), 2, make_shared<diffuse_light>(color(0.02, 1.2, 1.6)));
+	light_sphere_2 = make_shared<translate>(light_sphere_2, vec3(170, 350, 150));
+	world.add(light_sphere_2);
+
+	shared_ptr<hittable> light_sphere_3
+		= make_shared<sphere>(point3(0, 0, 0), 1, make_shared<diffuse_light>(color(0.02, 1.2, 1.6)));
+	light_sphere_3 = make_shared<translate>(light_sphere_3, vec3(180, 390, 150));
+	world.add(light_sphere_3);
+
+	shared_ptr<hittable> volume_sphere
+		= make_shared<sphere>(point3(0, 0, 0), 25, make_shared<diffuse_light>(color(0.02, 1.2, 1.6)));
+	volume_sphere = make_shared<translate>(volume_sphere, vec3(180, 420, 150));
+	world.add(make_shared<constant_medium>(volume_sphere, 0.02, color(0.02, 0.5, 0.6)));
+
+	hittable_list lights;
+	lights.add(light_quad);
+	lights.add(light_sphere);
+	lights.add(light_sphere_1);
+	lights.add(light_sphere_2);
+	lights.add(light_sphere_3);
+	lights.add(volume_sphere);
+
+	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
+	auto glass_mat = make_shared<dielectric>(1.5);
+	auto purple_metal = make_shared<metal>(color(.65, .05, .65), 0);
+	auto obj = load_obj_fit("assets/adult_link/Untitled.obj", mesh_mat, 500.0, true, nullptr, true, true);
+	// obj = make_shared<rotate_x>(obj, -35);
+	obj = make_shared<rotate_y>(obj, 180);
+	// obj = make_shared<rotate_z>(obj, 45);
+	obj = make_shared<translate>(obj, vec3(278, 230, 278));
+	world.add(obj);
+
+	world = hittable_list(make_shared<bvh_node>(world));
+
+	camera cam;
+	cam.aspect_ratio = 1.0;
+	cam.image_width = image_width;
+	cam.samples_per_pixel = samples_per_pixel;
+	cam.max_depth = max_depth;
+	cam.background = color(0, 0, 0);
+	cam.vfov = 40;
+	cam.lookfrom = point3(278, 278, -800);
+	cam.lookat = point3(278, 278, 0);
+	cam.vup = vec3(0, 1, 0);
+	cam.defocus_angle = 0;
+	cam.single_thread = single_thread;
+	cam.render(world, lights);
+}
+
+void suzanne_glass_spin(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+	auto glass_mat = make_shared<dielectric>(1.5);
+
+	// Load and tilt the mesh once; each frame re-wraps with a new rotate_y.
+	shared_ptr<hittable> base_mesh
+		= load_obj_fit("assets/suzanne.obj", glass_mat, 350.0, true, nullptr, true, true);
+	base_mesh = make_shared<rotate_x>(base_mesh, -20);
+
+	for (int deg = 0; deg < 360; deg++) {
+		hittable_list world;
+
+		auto red = make_shared<lambertian>(color(.65, .05, .05));
+		auto white = make_shared<lambertian>(color(.73, .73, .73));
+		auto green = make_shared<lambertian>(color(.12, .45, .15));
+		auto light = make_shared<diffuse_light>(color(10, 10, 10));
+
+		world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
+		world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
+		auto light_quad
+			= make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
+		world.add(light_quad);
+		world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
+		world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
+		world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
+
+		hittable_list lights;
+		lights.add(light_quad);
+
+		shared_ptr<hittable> obj = make_shared<rotate_y>(base_mesh, static_cast<double>(deg));
+		obj = make_shared<translate>(obj, vec3(278, 278, 278));
+		world.add(obj);
+
+		world = hittable_list(make_shared<bvh_node>(world));
+
+		camera cam;
+		cam.aspect_ratio = 1.0;
+		cam.image_width = image_width;
+		cam.samples_per_pixel = samples_per_pixel;
+		cam.max_depth = max_depth;
+		cam.background = color(0, 0, 0);
+		cam.vfov = 40;
+		cam.lookfrom = point3(278, 278, -800);
+		cam.lookat = point3(278, 278, 0);
+		cam.vup = vec3(0, 1, 0);
+		cam.defocus_angle = 0;
+		cam.single_thread = single_thread;
+
+		char frame_name[32];
+		std::snprintf(frame_name, sizeof(frame_name), "suzanne_glass_spin_%03d.png", deg);
+		std::clog << "Frame " << deg << "/359\n";
+		cam.render(world, lights, frame_name, true);
+	}
 }

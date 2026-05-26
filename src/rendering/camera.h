@@ -36,19 +36,23 @@ class camera {
 	double focus_dist = 10;	  // Distance from camera lookfrom to plane of perfect focus
 
 	// Renders the scene to stdout as a PPM image by shooting samples_per_pixel rays per pixel.
+	// If exact_path is true, filename is used as-is under renders/ with no timestamp suffix.
 	void render(const hittable& world, const hittable& lights,
-				const std::string& filename = "output.png") {
+				const std::string& filename = "output.png", bool exact_path = false) {
 		initialize();
-		std::time_t t = std::time(nullptr);
-		char timestamp[16];
-		std::strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", std::localtime(&t));
-
 		std::filesystem::create_directories("renders");
-		auto dot = filename.find_last_of('.');
-		std::string stem = (dot == std::string::npos) ? filename : filename.substr(0, dot);
-		std::string ext = (dot == std::string::npos) ? "" : filename.substr(dot);
-		std::string out_file
-			= "renders/" + stem + "_" + timestamp + "_" + std::to_string(samples_per_pixel) + "spp" + ext;
+		std::string out_file;
+		if (exact_path) {
+			out_file = "renders/" + filename;
+		} else {
+			std::time_t t = std::time(nullptr);
+			char timestamp[16];
+			std::strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", std::localtime(&t));
+			auto dot = filename.find_last_of('.');
+			std::string stem = (dot == std::string::npos) ? filename : filename.substr(0, dot);
+			std::string ext = (dot == std::string::npos) ? "" : filename.substr(dot);
+			out_file = "renders/" + stem + "_" + timestamp + "_" + std::to_string(samples_per_pixel) + "spp" + ext;
+		}
 		// Multithreading the rendering of each row
 		std::vector<color> framebuffer(image_width * image_height);
 
