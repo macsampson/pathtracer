@@ -33,17 +33,17 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
         <sub><b>Suzanne (OIDN Denoised)</b> - 100 SPP, 500x500</sub>
       </td>
     <td align="center">
-      <img src="gallery/portfolio1.png" width="600"/><br/>
+      <img src="gallery/portfolio1.png" width="500"/><br/>
       <sub><b>Randomized Sphere Cornell Box</b> - 2000 SPP, 600x600</sub>
     </td>
   </tr>
   <tr>
       <td align="center">
-        <img src="gallery/portfolio3.png" width="600"/><br/>
+        <img src="gallery/portfolio3.png" width="500"/><br/>
         <sub><b>Ball-filled Glass Cube</b> - 2000 SPP, 600x600</sub>
       </td>
     <td align="center">
-      <img src="gallery/portfolio2.png" width="600"/><br/>
+      <img src="gallery/portfolio2.png" width="500"/><br/>
       <sub><b>Earth, Moon & Mars</b> - Spherical UV mapping with texture data. 100 SPP, 1600x900</sub>
     </td>
   </tr>
