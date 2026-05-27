@@ -21,6 +21,7 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
 - **Triangle Meshes**: Barycentric intersection test; per-vertex normal interpolation for smooth shading; UV attribute interpolation
 - **OBJ Loading**: Wavefront OBJ parser supporting all face formats (`v`, `v/vt`, `v//vn`, `v/vt/vn`), negative indices, and n-gon fan triangulation; BVH-accelerated mesh; auto-scale helper
 - **Anti-aliasing**: Multi-sample per-pixel with random jitter
+- **Image Denoising**: Intel Open Image Denoiser for improved render fidelity at lower samples
 
 ---
 
