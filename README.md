@@ -37,8 +37,17 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
       <img src="gallery/portfolio1.png" width="300"/><br/>
       <sub><b>Randomized Sphere Cornell Box</b> - 2000 SPP, 600x600</sub>
     </td>
+        </td>
+    <td align="center">
+    <img src="gallery/link_500spp.png" width="500"/><br/>
+      <sub><b>Link & Navi</b> - 500 SPP, 500x500</sub>
+    </td>
   </tr>
   <tr>
+    <td align="center">
+    <img src="gallery/midna_500spp.png" width="500"/><br/>
+      <sub><b>Midna</b> - 500 SPP, 500x500</sub>
+    </td>
       <td align="center">
         <img src="gallery/portfolio3.png" width="300"/><br/>
         <sub><b>Ball-filled Glass Cube</b> - 2000 SPP, 600x600</sub>
@@ -136,18 +145,9 @@ This gives smooth curvature across a mesh without increasing triangle count, the
     <td align="center">
     <img src="gallery/triangle_obj_example.png" width="500"/><br/>
       <sub><b>Stanford Dragon</b> - 1000 SPP, 500x500</sub>
-    </td>
-    <td align="center">
-    <img src="gallery/link_500spp.png" width="500"/><br/>
-      <sub><b>Link & Navi</b> - 500 SPP, 500x500</sub>
-    </td>
+
   </tr>
-  <tr>
-    <td align="center">
-    <img src="gallery/midna_500spp.png" width="500"/><br/>
-      <sub><b>Midna</b> - 500 SPP, 500x500</sub>
-    </td>
-  </tr>
+
 </table>
 
 
