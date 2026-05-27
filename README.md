@@ -39,13 +39,13 @@ A C++ Monte Carlo path tracer that simulates physically-based light propagation 
     </td>
         </td>
     <td align="center">
-    <img src="gallery/link_500spp.png" width="500"/><br/>
+    <img src="gallery/link_500spp.png" width="300"/><br/>
       <sub><b>Link & Navi</b> - 500 SPP, 500x500</sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-    <img src="gallery/midna_500spp.png" width="500"/><br/>
+    <img src="gallery/midna_500spp.png" width="300"/><br/>
       <sub><b>Midna</b> - 500 SPP, 500x500</sub>
     </td>
       <td align="center">
