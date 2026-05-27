@@ -31,15 +31,14 @@ void cornell_box(int image_width, int samples_per_pixel, int max_depth, bool sin
 void cornell_random_spheres(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void cornell_variety(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void majora_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-void midna_tp_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-void midna_hw_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-void dragon_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-void armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-void suzanne_armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-void adult_link_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void midna_tp(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void midna_hw(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void dragon(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void armadillo(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void suzanne(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void suzanne_armadillo(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
+void adult_link(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
 void suzanne_glass_spin(int image_width, int samples_per_pixel, int max_depth, bool single_thread);
-// TODO: make a scene with a glass cube full of metal spheres.
 
 struct Scene {
 	const char* name;
@@ -58,13 +57,13 @@ int main(int argc, char* argv[]) {
 		{"cornell_random", cornell_random_spheres},
 		{"cornell_variety", cornell_variety},
 		{"majora_mesh", majora_mesh},
-		{"midna_tp_mesh", midna_tp_mesh},
-		{"midna_hw_mesh", midna_hw_mesh},
-		{"dragon_mesh", dragon_mesh},
-		{"armadillo_mesh", armadillo_mesh},
-		{"suzanne_mesh", suzanne_mesh},
-		{"adult_link_mesh", adult_link_mesh},
-		{"suzanne_armadillo_mesh", suzanne_armadillo_mesh},
+		{"midna_tp", midna_tp},
+		{"midna_hw", midna_hw},
+		{"dragon", dragon},
+		{"armadillo", armadillo},
+		{"suzanne", suzanne},
+		{"adult_link", adult_link},
+		{"suzanne_armadillo", suzanne_armadillo},
 		{"suzanne_glass_spin", suzanne_glass_spin},
 	};
 
@@ -849,7 +848,7 @@ void majora_mesh(int image_width, int samples_per_pixel, int max_depth, bool sin
 	cam.render(world, lights);
 }
 
-void midna_tp_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+void midna_tp(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -901,7 +900,7 @@ void midna_tp_mesh(int image_width, int samples_per_pixel, int max_depth, bool s
 	cam.render(world, lights);
 }
 
-void midna_hw_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+void midna_hw(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -951,10 +950,11 @@ void midna_hw_mesh(int image_width, int samples_per_pixel, int max_depth, bool s
 	cam.vup = vec3(0, 1, 0);
 	cam.defocus_angle = 0;
 	cam.single_thread = single_thread;
+	cam.denoise = true;
 	cam.render(world, lights);
 }
 
-void dragon_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+void dragon(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -1006,7 +1006,7 @@ void dragon_mesh(int image_width, int samples_per_pixel, int max_depth, bool sin
 	cam.render(world, lights);
 }
 
-void armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+void armadillo(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -1058,7 +1058,7 @@ void armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool 
 	cam.render(world, lights);
 }
 
-void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+void suzanne(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -1107,10 +1107,11 @@ void suzanne_mesh(int image_width, int samples_per_pixel, int max_depth, bool si
 	cam.vup = vec3(0, 1, 0);
 	cam.defocus_angle = 0;
 	cam.single_thread = single_thread;
+	cam.denoise = true;
 	cam.render(world, lights);
 }
 
-void suzanne_armadillo_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+void suzanne_armadillo(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -1170,7 +1171,7 @@ void suzanne_armadillo_mesh(int image_width, int samples_per_pixel, int max_dept
 	cam.render(world, lights);
 }
 
-void adult_link_mesh(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
+void adult_link(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	hittable_list world;
 
 	auto red = make_shared<lambertian>(color(.65, .05, .05));
@@ -1249,7 +1250,7 @@ void adult_link_mesh(int image_width, int samples_per_pixel, int max_depth, bool
 
 void suzanne_glass_spin(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	auto glass_mat = make_shared<dielectric>(1.5);
-	auto purple_metal = make_shared<metal>(color(.65, .05, .65), 0);
+	auto purple_metal = make_shared<metal>(color(.05, .65, .65), 0);
 
 	// Load and tilt the mesh once; each frame re-wraps with a new rotate_y.
 	shared_ptr<hittable> base_mesh
