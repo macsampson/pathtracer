@@ -162,11 +162,11 @@ Intel Open Image Denoise (OIDN) is integrated as a post-process step, accepting 
   <tr>
     <td align="center">
     <img src="gallery/noise.png" width="500"/><br/>
-      <sub><b>Suzanne</b> - 50 SPP, 500x500</sub>
+      <sub><b>Suzanne</b> - 20 SPP, 500x500</sub>
   </td>
     <td align="center">
     <img src="gallery/denoise.png" width="500"/><br/>
-      <sub><b>Suzanne Denoised</b> - 50 SPP, 500x500</sub>
+      <sub><b>Suzanne Denoised</b> - 20 SPP, 500x500</sub>
   </td>
   </tr>
 </table>
