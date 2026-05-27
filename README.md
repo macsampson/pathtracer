@@ -1,6 +1,6 @@
 # Software Path Tracer
 
-A C++ Monte Carlo path tracer that simulates physically-based light propagation to produce photorealistic renders.
+A C++ Monte Carlo offline path tracer that simulates physically-based light propagation.
 
 <p align="center">
   <img src="gallery/hero.png" alt="Cornell Box — 1000 SPP" width="600"/><br/>
@@ -147,9 +147,28 @@ This gives smooth curvature across a mesh without increasing triangle count, the
     <td align="center">
     <img src="gallery/triangle_obj_example.png" width="500"/><br/>
       <sub><b>Stanford Dragon</b> - 1000 SPP, 500x500</sub>
-
+    </td>
   </tr>
 
+</table>
+
+---
+
+### Image Denoising
+
+Intel Open Image Denoise (OIDN) is integrated as a post-process step, accepting the beauty pass alongside albedo and world-space normal AOVs rendered at the first diffuse surface hit. The AOVs give the denoiser geometric context to preserve edges and surface detail, producing clean results at sample counts that would otherwise be visibly noisy.
+
+<table>
+  <tr>
+    <td align="center">
+    <img src="gallery/noise.png" width="500"/><br/>
+      <sub><b>Suzanne</b> - 50 SPP, 500x500</sub>
+  </td>
+    <td align="center">
+    <img src="gallery/denoise.png" width="500"/><br/>
+      <sub><b>Suzanne Denoised</b> - 50 SPP, 500x500</sub>
+  </td>
+  </tr>
 </table>
 
 
