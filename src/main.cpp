@@ -911,20 +911,20 @@ void midna_hw_mesh(int image_width, int samples_per_pixel, int max_depth, bool s
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
-	auto light_quad = make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
 	world.add(light_quad);
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
 	world.add(make_shared<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white));
 
 	shared_ptr<hittable> light_sphere
-		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<diffuse_light>(color(15, 15, 15)));
+		= make_shared<sphere>(point3(0, 0, 0), 70, make_shared<diffuse_light>(color(7, 7, 7)));
 	light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
-	world.add(light_sphere);
+	// world.add(light_sphere);
 
 	hittable_list lights;
 	lights.add(light_quad);
-	lights.add(light_sphere);
+	// lights.add(light_sphere);
 
 	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
 	auto glass_mat = make_shared<dielectric>(1.5);
@@ -1166,6 +1166,7 @@ void suzanne_armadillo_mesh(int image_width, int samples_per_pixel, int max_dept
 	cam.vup = vec3(0, 1, 0);
 	cam.defocus_angle = 0;
 	cam.single_thread = single_thread;
+	cam.denoise = true;
 	cam.render(world, lights);
 }
 
@@ -1242,15 +1243,17 @@ void adult_link_mesh(int image_width, int samples_per_pixel, int max_depth, bool
 	cam.vup = vec3(0, 1, 0);
 	cam.defocus_angle = 0;
 	cam.single_thread = single_thread;
+	cam.denoise = true;
 	cam.render(world, lights);
 }
 
 void suzanne_glass_spin(int image_width, int samples_per_pixel, int max_depth, bool single_thread) {
 	auto glass_mat = make_shared<dielectric>(1.5);
+	auto purple_metal = make_shared<metal>(color(.65, .05, .65), 0);
 
 	// Load and tilt the mesh once; each frame re-wraps with a new rotate_y.
 	shared_ptr<hittable> base_mesh
-		= load_obj_fit("assets/suzanne.obj", glass_mat, 350.0, true, nullptr, true, true);
+		= load_obj_fit("assets/suzanne.obj", purple_metal, 350.0, true, nullptr, true, true);
 	base_mesh = make_shared<rotate_x>(base_mesh, -20);
 
 	for (int deg = 0; deg < 360; deg++) {
@@ -1290,6 +1293,7 @@ void suzanne_glass_spin(int image_width, int samples_per_pixel, int max_depth, b
 		cam.lookat = point3(278, 278, 0);
 		cam.vup = vec3(0, 1, 0);
 		cam.defocus_angle = 0;
+		cam.denoise = true;
 		cam.single_thread = single_thread;
 
 		char frame_name[32];
