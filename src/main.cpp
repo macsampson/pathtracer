@@ -427,7 +427,7 @@ void glass_cube(int image_width, int samples_per_pixel, int max_depth, bool sing
 	cam.lookfrom = point3(900, 278, -500);
 	cam.lookat = point3(500, 278, 0);
 	cam.vup = vec3(0, 1, 0);
-
+	cam.denoise = true;
 	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
@@ -709,7 +709,7 @@ void cornell_random_spheres(int image_width, int samples_per_pixel, int max_dept
 	cam.vup = vec3(0, 1, 0);
 
 	cam.defocus_angle = 0;
-
+	cam.denoise = true;
 	cam.single_thread = single_thread;
 	cam.render(world, lights);
 }
@@ -964,7 +964,7 @@ void dragon(int image_width, int samples_per_pixel, int max_depth, bool single_t
 
 	world.add(make_shared<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red));
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green));
-	auto light_quad = make_shared<quad>(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), light);
+	auto light_quad = make_shared<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light);
 	world.add(light_quad);
 	world.add(make_shared<quad>(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white));
 	world.add(make_shared<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white));
@@ -973,16 +973,16 @@ void dragon(int image_width, int samples_per_pixel, int max_depth, bool single_t
 	shared_ptr<hittable> light_sphere
 		= make_shared<sphere>(point3(0, 0, 0), 35, make_shared<diffuse_light>(color(15, 15, 15)));
 	light_sphere = make_shared<translate>(light_sphere, vec3(470, 75, 150));
-	world.add(light_sphere);
+	// world.add(light_sphere);
 
 	hittable_list lights;
 	lights.add(light_quad);
-	lights.add(light_sphere);
+	// lights.add(light_sphere);
 
 	auto mesh_mat = make_shared<lambertian>(color(0.8, 0.7, 0.6));
 	auto glass_mat = make_shared<dielectric>(1.5);
 	auto red_metal = make_shared<metal>(color(.65, .05, .05), 0);
-	auto obj = load_obj_fit("assets/dragon.obj", mesh_mat, 500.0, true, glass_mat);
+	auto obj = load_obj_fit("assets/dragon.obj", mesh_mat, 500.0, true, red_metal);
 	obj = make_shared<rotate_x>(obj, -90);
 	obj = make_shared<rotate_y>(obj, 200);
 	// obj = make_shared<rotate_z>(obj, 45);
@@ -1003,6 +1003,7 @@ void dragon(int image_width, int samples_per_pixel, int max_depth, bool single_t
 	cam.vup = vec3(0, 1, 0);
 	cam.defocus_angle = 0;
 	cam.single_thread = single_thread;
+	cam.denoise = true;
 	cam.render(world, lights);
 }
 
@@ -1277,8 +1278,9 @@ void suzanne_glass_spin(int image_width, int samples_per_pixel, int max_depth, b
 		hittable_list lights;
 		lights.add(light_quad);
 
+		double y_offset = 35.0 * std::sin(deg * 2 * pi / 180.0);
 		shared_ptr<hittable> obj = make_shared<rotate_y>(base_mesh, static_cast<double>(deg));
-		obj = make_shared<translate>(obj, vec3(278, 278, 278));
+		obj = make_shared<translate>(obj, vec3(278, 278 + y_offset, 278));
 		world.add(obj);
 
 		world = hittable_list(make_shared<bvh_node>(world));
