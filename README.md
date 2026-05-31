@@ -145,8 +145,8 @@ This gives smooth curvature across a mesh without increasing triangle count, the
 <table>
   <tr>
     <td align="center">
-    <img src="gallery/triangle_obj_example.png" width="500"/><br/>
-      <sub><b>Stanford Dragon</b> - 1000 SPP, 500x500</sub>
+    <img src="gallery/dragon_100spp_dn.png" width="500"/><br/>
+      <sub><b>Stanford Dragon</b> - 100 SPP, 600x600</sub>
     </td>
   </tr>
 
@@ -162,11 +162,11 @@ Intel Open Image Denoise (OIDN) is integrated as a post-process step, accepting 
   <tr>
     <td align="center">
     <img src="gallery/noise.png" width="500"/><br/>
-      <sub><b>Suzanne</b> - 20 SPP, 500x500</sub>
+      <sub><b>Noisy</b> - 20 SPP, 500x500</sub>
   </td>
     <td align="center">
     <img src="gallery/denoise.png" width="500"/><br/>
-      <sub><b>Suzanne Denoised</b> - 20 SPP, 500x500</sub>
+      <sub><b>Denoised</b> - 20 SPP, 500x500</sub>
   </td>
   </tr>
 </table>
