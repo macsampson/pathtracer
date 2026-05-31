@@ -30,7 +30,7 @@ A C++ Monte Carlo offline path tracer that simulates physically-based light prop
 <table>
   <tr>
     <td align="center">
-        <img src="gallery/gif/suzanne_hqo_50spp.gif" width="300"/><br/>
+        <img src="gallery/gif/suzanne_hqo_50spp.webp" width="300"/><br/>
         <sub><b>Suzanne (OIDN Denoised)</b> - 50 SPP, 500x500</sub>
       </td>
     <td align="center">
